@@ -14,6 +14,7 @@ import HeyWaitLayer from './module/heyWaitLayer';
 /* eslint-disable no-unreachable */
 /* eslint-disable no-unused-vars */
 /* global Canvas */
+/* global CONFIG */
 /* global Hooks */
 /* global Scene */
 /* global canvas */
@@ -154,5 +155,8 @@ Hooks.on('updateToken', (scene, entity, delta, audit) => {
     }
 
     game.togglePause(true, true);
+    canvas.animatePan({
+      x: entity.x, y: entity.y, scale: Math.max(1, canvas.stage.scale.x), duration: 1000,
+    });
   });
 });
