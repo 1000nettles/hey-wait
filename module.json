@@ -4,6 +4,13 @@
   "description": "\"Hey, Wait!\" is a FoundryVTT module allowing a GM to place \"event triggers\" on a scene.",
   "version": "0.1.0",
   "author": "1000nettles",
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
   "esmodules": [
     "hey-wait.js"
   ],

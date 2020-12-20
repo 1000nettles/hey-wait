@@ -1,0 +1,11 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["airbnb"],
+  "rules": {
+    "class-methods-use-this": "off",
+    "import/no-unresolved": "off",
+    "no-new": "off",
+    "no-underscore-dangle": "off",
+    "no-restricted-syntax": "off"
+  }
+}
