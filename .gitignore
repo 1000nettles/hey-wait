@@ -1,3 +1,9 @@
+dist/lang
+dist/templates
+dist/assets
+dist/module
+dist/*.js
+dist/*.json
 node_modules
 foundryconfig.json
 .idea

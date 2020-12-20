@@ -17,10 +17,10 @@ Hooks.once('init', async function() {
 	console.log('hey-wait | Initializing hey-wait');
 
 	// Assign custom classes and constants here
-	
+
 	// Register custom module settings
 	registerSettings();
-	
+
 	// Preload Handlebars templates
 	await preloadTemplates();
 
