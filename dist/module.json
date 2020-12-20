@@ -1,0 +1,17 @@
+{
+  "name": "hey-wait",
+  "title": "Hey, Wait!",
+  "description": "\"Hey, Wait!\" is a FoundryVTT module allowing a GM to place \"event triggers\" on a scene.",
+  "version": "0.1.0",
+  "author": "1000nettles",
+  "esmodules": [
+    "hey-wait.js"
+  ],
+  "minimumCoreVersion": "0.7.7",
+  "compatibleCoreVersion": "0.7.9",
+  "url": "https://github.com/1000nettles/hey-wait",
+  "manifest": "",
+  "download": "",
+  "license": "MIT",
+  "readme": "https://raw.githubusercontent.com/1000nettles/hey-wait/main/README.md"
+}
