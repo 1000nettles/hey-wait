@@ -15,18 +15,16 @@ export default class ControlsGenerator {
       return;
     }
 
-    controls.push({
-      name: 'heyWait',
-      title: 'Hey, Wait!',
+    const tileControl = controls.find((control) => control?.name === 'tiles');
+
+    if (!tileControl) {
+      return;
+    }
+
+    tileControl.tools.push({
+      name: 'heyWaitTile',
+      title: 'Hey, Wait! Tile',
       icon: 'fas fa-hand-paper',
-      layer: 'HeyWaitLayer',
-      tools: [
-        {
-          name: 'rect',
-          title: 'CONTROLS.MeasureRect',
-          icon: 'far fa-square',
-        },
-      ],
     });
   }
 }

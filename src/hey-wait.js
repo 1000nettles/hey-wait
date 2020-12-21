@@ -9,10 +9,12 @@
 // Import JavaScript modules
 import registerSettings from './module/settings';
 import HeyWaitLayer from './module/heyWaitLayer';
+import ControlsGenerator from './module/controlsGenerator';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
 /* eslint-disable no-unused-vars */
+/* eslint-disable no-param-reassign */
 /* eslint-disable func-names */
 /* global Canvas */
 /* global CONFIG */
@@ -114,65 +116,59 @@ Hooks.on('renderApplication', () => {
 });
 
 Hooks.on('renderTileConfig', (config) => {
-  let html = '<div class="form-group"><label for="isHeyWaitTile">Is "Hey, Wait!" Tile?</label><input type="checkbox" id="isHeyWaitTile" name="isHeyWaitTile" ';
-
-  const flag = Boolean(config.object.data?.flags?.['hey-wait']?.enabled);
-
-  console.log(flag);
-
-  if (flag) {
-    html += 'checked="checked" ';
+  if (game.activeTool !== 'heyWaitTile') {
+    return;
   }
 
-  html += '/></div>';
-  jQuery(html).insertBefore(
+  // Hide the file picker and notes for Hey, Wait! tiling...
+  const tileSpriteInputEl = jQuery(config.form).find('input[name="img"]');
+  const tileSpriteGroupEl = tileSpriteInputEl.closest('.form-group');
+  const tileSpriteNotesEl = tileSpriteGroupEl.prev('.notes');
+  tileSpriteGroupEl.hide();
+  tileSpriteNotesEl.hide();
+
+  tileSpriteInputEl.val('modules/hey-wait/img/hey_wait_red.png');
+
+  const newNotes = jQuery('<p>')
+    .attr('class', 'notes');
+  newNotes.html('Configure this Hey, Wait! tile. Hey, Wait! tiles that are <span style="color:darkred;font-weight:bold;">red</span> have not been activated yet. Hey, Wait! tiles that are <span style="color:green;font-weight:bold;">green</span> have already been activated by players.');
+
+  const hidden = jQuery('<input>')
+    .attr('type', 'hidden')
+    .attr('name', 'isHeyWaitTile')
+    .attr('value', 1);
+
+  newNotes.insertBefore(tileSpriteGroupEl);
+  jQuery(hidden).insertBefore(
     jQuery(config.form).find(':submit'),
   );
-
-  jQuery(config.form).find('#isHeyWaitTile').change(function () {
-    const filePicker = jQuery(config.form).find('input[name="img"]');
-    if (jQuery(this).is(':checked') && !filePicker.val().trim()) {
-      filePicker.val('modules/hey-wait/img/transparent.png');
-    }
-  });
 });
 
-Hooks.on('preUpdateTile', (scene, data, delta) => {
-  console.log('delta');
-  console.log(delta);
+Hooks.on('preCreateTile', (scene, data) => {
+  const isHeyWait = Boolean(data?.isHeyWaitTile);
 
-  const tile = canvas.tiles.get(data._id);
-  const isHeyWait = Boolean(data.isHeyWaitTile);
-
-  // tile.setFlag('hey-wait', 'enabled', Boolean(data.isHeyWaitTile));
-
-  console.log(tile.data);
-
-  if (!tile.data.flags?.['hey-wait']) {
-    tile.data.flags['hey-wait'] = {
-      enabled: isHeyWait,
-    };
-  } else {
-    tile.data.flags['hey-wait'].enabled = isHeyWait;
+  if (!isHeyWait) {
+    return;
   }
 
-  console.log(tile);
-
-  if (isHeyWait) {
-    tile.data.hidden = true;
-
-    if (!tile.data?.img) {
-      tile.data.img = 'modules/hey-wait/transparent.png';
-    }
+  // Set the "hey wait" flag on the new tile dataset.
+  if (!data?.flags) {
+    data.flags = {};
   }
 
-  console.log(tile);
+  data.flags['hey-wait'] = {
+    enabled: true,
+  };
+
+  // Hey wait tiles should be hidden so players cannot see them.
+  data.hidden = true;
 });
 
 Hooks.on('updateToken', (scene, entity, delta, audit) => {
   console.log('delta');
   console.log(delta);
   canvas.tiles.placeables.forEach((tile) => {
+    console.log(tile);
     const isHeyWait = Boolean(tile.data?.flags?.['hey-wait']?.enabled);
     if (!isHeyWait) {
       return;
@@ -186,9 +182,31 @@ Hooks.on('updateToken', (scene, entity, delta, audit) => {
       return;
     }
 
+    // Update the tile to show it has been triggered.
+    tile.data.img = 'modules/hey-wait/img/hey_wait_green.png';
+    tile.update(tile.data, { diff: false });
+
     game.togglePause(true, true);
     canvas.animatePan({
       x: entity.x, y: entity.y, scale: Math.max(1, canvas.stage.scale.x), duration: 1000,
     });
   });
+});
+
+Hooks.on('getSceneControlButtons', (controls) => {
+  const controlsGenerator = new ControlsGenerator();
+  controlsGenerator.generate(
+    controls,
+    game.user.isGM,
+  );
+});
+
+Hooks.on('renderFormApplication', (tileConfig, html, options) => {
+  if (game.activeTool !== 'heyWaitTile') {
+    return;
+  }
+
+  const windowTitleEl = html.find('.window-title');
+  const originalTitle = windowTitleEl.html();
+  windowTitleEl.html(`Hey, Wait! ${originalTitle}`);
 });
