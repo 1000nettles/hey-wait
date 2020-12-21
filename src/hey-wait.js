@@ -44,13 +44,27 @@ function heyWaitInBounds(tile, token) {
   });
 
   if (
-    (x > tile.x && y > tile.y)
-    && (x < maxX && y < maxY)
+    (x >= tile.x && y >= tile.y)
+    && (x <= maxX && y <= maxY)
   ) {
     return true;
   }
 
   return false;
+}
+
+function isHeyWaitTile(tile) {
+  if (tile.data?._id) {
+    // Existing tile.
+    if (!tile.data?.flags?.['hey-wait']?.enabled) {
+      return false;
+    }
+  } else if (game.activeTool !== 'heyWaitTile') {
+    // If we're placing a new tile and it's a Hey, Wait! tile.
+    return false;
+  }
+
+  return true;
 }
 
 /* ------------------------------------ */
@@ -77,39 +91,6 @@ Hooks.once('setup', () => {
 /* ------------------------------------ */
 Hooks.once('ready', () => {
   // Do anything once the module is ready.
-});
-
-Hooks.on('renderTileConfig', (config) => {
-  const isHeyWait = Boolean(config.object.data?.flags?.['hey-wait']?.enabled);
-
-  if (!isHeyWait) {
-    return;
-  }
-
-  // Hide the file picker and notes for Hey, Wait! tiling...
-  const tileSpriteInputEl = jQuery(config.form).find('input[name="img"]');
-  const tileSpriteGroupEl = tileSpriteInputEl.closest('.form-group');
-  const tileSpriteNotesEl = tileSpriteGroupEl.prev('.notes');
-  tileSpriteGroupEl.hide();
-  tileSpriteNotesEl.hide();
-
-  tileSpriteInputEl.val('modules/hey-wait/img/hey_wait_red.png');
-
-  const newNotes = jQuery('<p>')
-    .attr('class', 'notes');
-  newNotes.html(
-    'Configure this Hey, Wait! tile. Hey, Wait! tiles that are <span style="color:darkred;font-weight:bold;">red</span> have not been triggered yet. Hey, Wait! tiles that are <span style="color:green;font-weight:bold;">green</span> have already been triggered by players.',
-  );
-
-  const hidden = jQuery('<input>')
-    .attr('type', 'hidden')
-    .attr('name', 'isHeyWaitTile')
-    .attr('value', 1);
-
-  newNotes.insertBefore(tileSpriteGroupEl);
-  jQuery(hidden).insertBefore(
-    jQuery(config.form).find(':submit'),
-  );
 });
 
 Hooks.on('preCreateTile', (scene, data) => {
@@ -192,16 +173,45 @@ Hooks.on('getSceneControlButtons', (controls) => {
   );
 });
 
-Hooks.on('renderFormApplication', (tileConfig, html, options) => {
-  const isHeyWait = tileConfig.object.data?.flags?.['hey-wait']?.enabled;
-
-  if (!isHeyWait) {
+Hooks.on('renderFormApplication', (tileConfig, html) => {
+  if (!isHeyWaitTile(tileConfig.object)) {
     return;
   }
 
   const windowTitleEl = html.find('.window-title');
   const originalTitle = windowTitleEl.html();
   windowTitleEl.html(`Hey, Wait! ${originalTitle}`);
+});
+
+Hooks.on('renderTileConfig', (config) => {
+  if (!isHeyWaitTile(config.object)) {
+    return;
+  }
+
+  // Hide the file picker and notes for Hey, Wait! tiling...
+  const tileSpriteInputEl = jQuery(config.form).find('input[name="img"]');
+  const tileSpriteGroupEl = tileSpriteInputEl.closest('.form-group');
+  const tileSpriteNotesEl = tileSpriteGroupEl.prev('.notes');
+  tileSpriteGroupEl.hide();
+  tileSpriteNotesEl.hide();
+
+  tileSpriteInputEl.val('modules/hey-wait/img/hey_wait_red.png');
+
+  const newNotes = jQuery('<p>')
+    .attr('class', 'notes');
+  newNotes.html(
+    'Configure this Hey, Wait! tile. Hey, Wait! tiles that are <span style="color:darkred;font-weight:bold;">red</span> have not been triggered yet. Hey, Wait! tiles that are <span style="color:green;font-weight:bold;">green</span> have already been triggered by players.',
+  );
+
+  const hidden = jQuery('<input>')
+    .attr('type', 'hidden')
+    .attr('name', 'isHeyWaitTile')
+    .attr('value', 1);
+
+  newNotes.insertBefore(tileSpriteGroupEl);
+  jQuery(hidden).insertBefore(
+    jQuery(config.form).find(':submit'),
+  );
 });
 
 Hooks.on('renderTileHUD', async (tileHud, html) => {
@@ -215,7 +225,8 @@ Hooks.on('renderTileHUD', async (tileHud, html) => {
   // from players' view.
   html.find('.control-icon.visibility').hide();
 
-  // Append Hey, Wait! template for the HUD.
+  // Append Hey, Wait! template for the HUD. We need to specify `isNotTriggered`
+  // due to Handlebars not being able to inverse logic in a conditional.
   const form = await renderTemplate('/modules/hey-wait/templates/hud.hbs', {
     isNotTriggered: !tile.data?.flags?.['hey-wait']?.triggered,
   });
