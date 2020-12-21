@@ -13,6 +13,7 @@ import HeyWaitLayer from './module/heyWaitLayer';
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
 /* eslint-disable no-unused-vars */
+/* eslint-disable func-names */
 /* global Canvas */
 /* global CONFIG */
 /* global Hooks */
@@ -113,12 +114,9 @@ Hooks.on('renderApplication', () => {
 });
 
 Hooks.on('renderTileConfig', (config) => {
-  console.log('is it jquery?');
-  console.log(jQuery(config.form).attr('autocomplete'));
+  let html = '<div class="form-group"><label for="isHeyWaitTile">Is "Hey, Wait!" Tile?</label><input type="checkbox" id="isHeyWaitTile" name="isHeyWaitTile" ';
 
-  let html = '<div class="form-group"><label for="isHeyWaitTile">Is "Hey, Wait!" Tile?</label><input type="checkbox" name="isHeyWaitTile" ';
-
-  const flag = Boolean(config.object.data?.flags?.['hey-wait'].enabled);
+  const flag = Boolean(config.object.data?.flags?.['hey-wait']?.enabled);
 
   console.log(flag);
 
@@ -130,11 +128,45 @@ Hooks.on('renderTileConfig', (config) => {
   jQuery(html).insertBefore(
     jQuery(config.form).find(':submit'),
   );
+
+  jQuery(config.form).find('#isHeyWaitTile').change(function () {
+    const filePicker = jQuery(config.form).find('input[name="img"]');
+    if (jQuery(this).is(':checked') && !filePicker.val().trim()) {
+      filePicker.val('modules/hey-wait/img/transparent.png');
+    }
+  });
 });
 
-Hooks.on('updateTile', (scene, data) => {
+Hooks.on('preUpdateTile', (scene, data, delta) => {
+  console.log('delta');
+  console.log(delta);
+
   const tile = canvas.tiles.get(data._id);
-  tile.setFlag('hey-wait', 'enabled', data.isHeyWaitTile);
+  const isHeyWait = Boolean(data.isHeyWaitTile);
+
+  // tile.setFlag('hey-wait', 'enabled', Boolean(data.isHeyWaitTile));
+
+  console.log(tile.data);
+
+  if (!tile.data.flags?.['hey-wait']) {
+    tile.data.flags['hey-wait'] = {
+      enabled: isHeyWait,
+    };
+  } else {
+    tile.data.flags['hey-wait'].enabled = isHeyWait;
+  }
+
+  console.log(tile);
+
+  if (isHeyWait) {
+    tile.data.hidden = true;
+
+    if (!tile.data?.img) {
+      tile.data.img = 'modules/hey-wait/transparent.png';
+    }
+  }
+
+  console.log(tile);
 });
 
 Hooks.on('updateToken', (scene, entity, delta, audit) => {

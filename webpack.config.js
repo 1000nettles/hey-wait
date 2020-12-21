@@ -18,6 +18,7 @@ module.exports = {
       patterns: [
         { from: './module.json', to: './' },
         { from: './lang/*', to: './' },
+        { from: './img/*', to: './' },
       ],
     }),
   ],
