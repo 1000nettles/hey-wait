@@ -23,7 +23,7 @@ export default class ControlsGenerator {
 
     tileControl.tools.push({
       name: 'heyWaitTile',
-      title: 'Hey, Wait! Tile',
+      title: 'Place "Hey, Wait!" Tile',
       icon: 'fas fa-hand-paper',
     });
   }

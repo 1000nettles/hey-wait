@@ -8,7 +8,6 @@
 
 // Import JavaScript modules
 import registerSettings from './module/settings';
-import HeyWaitLayer from './module/heyWaitLayer';
 import ControlsGenerator from './module/controlsGenerator';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
@@ -23,35 +22,10 @@ import ControlsGenerator from './module/controlsGenerator';
 /* global canvas */
 /* global game */
 /* global jQuery */
+/* global getFlag */
 /* global mergeObject */
-
-/**
- * Register the Combat Numbers layer into the Canvas' static layers.
- */
-function registerStaticLayer() {
-  const { layers } = Canvas;
-  layers.heyWait = HeyWaitLayer;
-  Object.defineProperty(Canvas, 'layers', {
-    get() {
-      return layers;
-    },
-  });
-}
-
-function registerStaticSceneConfig() {
-  return;
-  console.log('registering static scene config');
-  console.log(Scene.config);
-  const existingConfig = Scene.config;
-  existingConfig.embeddedEntities = mergeObject(existingConfig.embeddedEntities, {
-    HeyWaitMeasuredTemplate: 'heyWaitTemplates',
-  });
-
-  Object.defineProperty(Scene, 'config', {
-    get: () => existingConfig,
-  });
-  console.log(Scene.config);
-}
+/* global renderTemplate */
+/* global setFlag */
 
 function heyWaitInBounds(tile, token) {
   const maxX = tile.width + tile.x;
@@ -89,34 +63,26 @@ Hooks.once('init', async () => {
 
   // Register custom module settings
   registerSettings();
-  registerStaticLayer();
-
-  // Register custom sheets (if any)
 });
 
 /* ------------------------------------ */
 /* Setup module                         */
 /* ------------------------------------ */
 Hooks.once('setup', () => {
-  // Do anything after initialization but before
-  // ready
+  // Do anything after initialization but before ready.
 });
 
 /* ------------------------------------ */
 /* When ready                           */
 /* ------------------------------------ */
 Hooks.once('ready', () => {
-  // Do anything once the module is ready
-  // registerStaticSceneConfig();
-  console.log(Scene.config);
-});
-
-Hooks.on('renderApplication', () => {
-  registerStaticSceneConfig();
+  // Do anything once the module is ready.
 });
 
 Hooks.on('renderTileConfig', (config) => {
-  if (game.activeTool !== 'heyWaitTile') {
+  const isHeyWait = Boolean(config.object.data?.flags?.['hey-wait']?.enabled);
+
+  if (!isHeyWait) {
     return;
   }
 
@@ -131,7 +97,9 @@ Hooks.on('renderTileConfig', (config) => {
 
   const newNotes = jQuery('<p>')
     .attr('class', 'notes');
-  newNotes.html('Configure this Hey, Wait! tile. Hey, Wait! tiles that are <span style="color:darkred;font-weight:bold;">red</span> have not been activated yet. Hey, Wait! tiles that are <span style="color:green;font-weight:bold;">green</span> have already been activated by players.');
+  newNotes.html(
+    'Configure this Hey, Wait! tile. Hey, Wait! tiles that are <span style="color:darkred;font-weight:bold;">red</span> have not been triggered yet. Hey, Wait! tiles that are <span style="color:green;font-weight:bold;">green</span> have already been triggered by players.',
+  );
 
   const hidden = jQuery('<input>')
     .attr('type', 'hidden')
@@ -151,26 +119,52 @@ Hooks.on('preCreateTile', (scene, data) => {
     return;
   }
 
-  // Set the "hey wait" flag on the new tile dataset.
+  // Set the "hey-wait" flag on the new tile dataset.
   if (!data?.flags) {
     data.flags = {};
   }
 
   data.flags['hey-wait'] = {
     enabled: true,
+    triggered: false,
   };
 
-  // Hey wait tiles should be hidden so players cannot see them.
+  // Hey, Wait! tiles should be hidden so players cannot see them.
   data.hidden = true;
 });
 
-Hooks.on('updateToken', (scene, entity, delta, audit) => {
-  console.log('delta');
-  console.log(delta);
+Hooks.on('preUpdateTile', (scene, data, delta) => {
+  // Only update images if we're dealing with newly triggered or not triggered
+  // Hey, Wait! tiles.
+  if (typeof delta?.flags?.['hey-wait']?.triggered === 'undefined') {
+    return;
+  }
+
+  if (delta.flags['hey-wait'].triggered) {
+    delta.img = 'modules/hey-wait/img/hey_wait_green.png';
+  } else {
+    delta.img = 'modules/hey-wait/img/hey_wait_red.png';
+  }
+});
+
+Hooks.on('updateToken', (scene, entity, delta) => {
+  // Exit early if there's no relevant updates. Specifically, if the token
+  // has not moved or the game is actually paused.
+  if (
+    (!delta?.x && !delta?.y)
+    || game.paused
+  ) {
+    return;
+  }
+
   canvas.tiles.placeables.forEach((tile) => {
-    console.log(tile);
     const isHeyWait = Boolean(tile.data?.flags?.['hey-wait']?.enabled);
     if (!isHeyWait) {
+      return;
+    }
+
+    const hasBeenTriggered = Boolean(tile.data?.flags?.['hey-wait']?.triggered);
+    if (hasBeenTriggered) {
       return;
     }
 
@@ -178,12 +172,9 @@ Hooks.on('updateToken', (scene, entity, delta, audit) => {
       return;
     }
 
-    if (game.paused) {
-      return;
-    }
-
-    // Update the tile to show it has been triggered.
+    // Update the tile to reflect that it has been triggered.
     tile.data.img = 'modules/hey-wait/img/hey_wait_green.png';
+    tile.data.flags['hey-wait'].triggered = true;
     tile.update(tile.data, { diff: false });
 
     game.togglePause(true, true);
@@ -202,11 +193,42 @@ Hooks.on('getSceneControlButtons', (controls) => {
 });
 
 Hooks.on('renderFormApplication', (tileConfig, html, options) => {
-  if (game.activeTool !== 'heyWaitTile') {
+  const isHeyWait = tileConfig.object.data?.flags?.['hey-wait']?.enabled;
+
+  if (!isHeyWait) {
     return;
   }
 
   const windowTitleEl = html.find('.window-title');
   const originalTitle = windowTitleEl.html();
   windowTitleEl.html(`Hey, Wait! ${originalTitle}`);
+});
+
+Hooks.on('renderTileHUD', async (tileHud, html) => {
+  const tile = tileHud.object;
+
+  if (!tile.data?.flags?.['hey-wait']?.enabled) {
+    return;
+  }
+
+  // Hide the visibility icon as the Hey, Wait! tiles should always be hidden
+  // from players' view.
+  html.find('.control-icon.visibility').hide();
+
+  // Append Hey, Wait! template for the HUD.
+  const form = await renderTemplate('/modules/hey-wait/templates/hud.hbs', {
+    isNotTriggered: !tile.data?.flags?.['hey-wait']?.triggered,
+  });
+  html.find('.col.right').prepend(form);
+
+  html.find('.hey-wait-isNotTriggered').click(async () => {
+    // Toggle the triggered state of the Hey, Wait! tile.
+    await tile.setFlag(
+      'hey-wait',
+      'triggered',
+      !tile.getFlag('hey-wait', 'triggered'),
+    );
+
+    tileHud.render();
+  });
 });

@@ -19,6 +19,7 @@ module.exports = {
         { from: './module.json', to: './' },
         { from: './lang/*', to: './' },
         { from: './img/*', to: './' },
+        { from: './templates/*', to: './' },
       ],
     }),
   ],
