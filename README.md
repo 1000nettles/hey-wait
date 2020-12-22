@@ -1,4 +1,11 @@
 # Hey, Wait! :raised_hand:
+
+![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.1.1.zip?style=flat-square)
+![Issues](https://img.shields.io/github/issues/1000nettles/hey-wait?style=flat-square)
+![MIT License](https://img.shields.io/github/license/1000nettles/hey-wait?style=flat-square)
+
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G82ZNNS)
+
 “Hey, Wait!” is a FoundryVTT module allowing a GM to place “event triggers” as tiles on a scene. When players collide with these triggers, the game pauses and the scene shifts to the player, allowing a GM to explain the theatre-of-the-mind landscape, if the player has ran into a pack of monsters, or anything else you can think of! The intent is to give GMs a bit of breathing room with a pack of players who love to explore.
 
 ## What Does This Look Like? :eyes:
@@ -37,3 +44,7 @@ Note that the visibility button has disappeared. Hey, Wait! tiles are always inv
 * Sound effects when triggering tiles
 * Accessibility improvements
 * ...please suggest some!
+
+## Acknowledgements :wave:
+
+* Thanks to [Game-icons.net](https://game-icons.net) for the use of the ["Halt" icon](https://game-icons.net/1x1/skoll/halt.html)
