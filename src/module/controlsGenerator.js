@@ -1,6 +1,8 @@
 /**
  * Facilitate the generation of the Controls for the toolbar.
  */
+import Constants from './constants';
+
 export default class ControlsGenerator {
   /**
    * Generate the toolbar controls.
@@ -22,7 +24,7 @@ export default class ControlsGenerator {
     }
 
     tileControl.tools.push({
-      name: 'heyWaitTile',
+      name: Constants.TOOLNAME,
       title: 'Place "Hey, Wait!" Tile',
       icon: 'fas fa-hand-paper',
     });

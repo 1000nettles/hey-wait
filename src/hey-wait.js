@@ -6,11 +6,12 @@
  * Software License: MIT
  */
 
-// Import JavaScript modules
+// Import JavaScript modules.
 import registerSettings from './module/settings';
 import ControlsGenerator from './module/controlsGenerator';
 import Collision from './module/collision';
 import Triggering from './module/triggering';
+import TileAuditor from './module/tileAuditor';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -39,52 +40,33 @@ let collision;
  */
 let triggering;
 
-function isHeyWaitTile(tile) {
-  if (tile.data?._id) {
-    // Existing tile.
-    if (!tile.data?.flags?.['hey-wait']?.enabled) {
-      return false;
-    }
-  } else if (game.activeTool !== 'heyWaitTile') {
-    // If we're placing a new tile and it's a Hey, Wait! tile.
-    return false;
-  }
-
-  return true;
-}
+/**
+ * Our TileAuditor instance.
+ */
+let tileAuditor;
 
 /* ------------------------------------ */
 /* Initialize module                    */
 /* ------------------------------------ */
 Hooks.once('init', async () => {
   console.log('hey-wait | Initializing hey-wait');
-
-  // Assign custom classes and constants here
-
-  // Register custom module settings
   registerSettings();
 });
 
 /* ------------------------------------ */
 /* Setup module                         */
 /* ------------------------------------ */
-Hooks.once('setup', () => {
-  // Do anything after initialization but before ready.
-});
-
 Hooks.on('canvasReady', () => {
   collision = new Collision(canvas.grid.size);
   triggering = new Triggering(collision);
+  tileAuditor = new TileAuditor();
 });
 
 /* ------------------------------------ */
 /* When ready                           */
 /* ------------------------------------ */
-Hooks.once('ready', () => {
-  // Do anything once the module is ready.
-});
-
 Hooks.on('preCreateTile', (scene, data) => {
+  // This is referencing the data attached from the form submission, not a flag.
   const isHeyWait = Boolean(data?.isHeyWaitTile);
 
   if (!isHeyWait) {
@@ -125,6 +107,7 @@ Hooks.on('updateToken', async (scene, token, delta) => {
   if (
     (!delta?.x && !delta?.y)
     || game.paused
+    || !game.user.isGM
   ) {
     return;
   }
@@ -162,7 +145,9 @@ Hooks.on('getSceneControlButtons', (controls) => {
 });
 
 Hooks.on('renderFormApplication', (tileConfig, html) => {
-  if (!isHeyWaitTile(tileConfig.object)) {
+  if (
+    !tileAuditor.isHeyWaitTile(tileConfig.object, game.activeTool)
+  ) {
     return;
   }
 
@@ -172,7 +157,9 @@ Hooks.on('renderFormApplication', (tileConfig, html) => {
 });
 
 Hooks.on('renderTileConfig', (config) => {
-  if (!isHeyWaitTile(config.object)) {
+  if (
+    !tileAuditor.isHeyWaitTile(config.object, game.activeTool)
+  ) {
     return;
   }
 
