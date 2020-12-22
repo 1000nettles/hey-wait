@@ -17,7 +17,7 @@ export default class Constants {
    * @return {string}
    */
   static get TILE_GREEN_PATH() {
-    return 'modules/hey-wait/img/hey_wait_green.png';
+    return 'modules/hey-wait/src/img/hey_wait_green.png';
   }
 
   /**

@@ -123,9 +123,9 @@ Hooks.on('preUpdateTile', (scene, data, delta) => {
   }
 
   if (delta.flags['hey-wait'].triggered) {
-    delta.img = 'modules/hey-wait/img/hey_wait_green.png';
+    delta.img = 'modules/hey-wait/src/img/hey_wait_green.png';
   } else {
-    delta.img = 'modules/hey-wait/img/hey_wait_red.png';
+    delta.img = 'modules/hey-wait/src/img/hey_wait_red.png';
   }
 });
 
@@ -210,7 +210,7 @@ Hooks.on('renderTileConfig', (config) => {
   rotationGroupEl.hide();
   tileSpriteNotesEl.hide();
 
-  tileSpriteInputEl.val('modules/hey-wait/img/hey_wait_red.png');
+  tileSpriteInputEl.val('modules/hey-wait/src/img/hey_wait_red.png');
 
   const newNotes = jQuery('<p>')
     .attr('class', 'notes');
@@ -242,7 +242,7 @@ Hooks.on('renderTileHUD', async (tileHud, html) => {
 
   // Append Hey, Wait! template for the HUD. We need to specify `isNotTriggered`
   // due to Handlebars not being able to inverse logic in a conditional.
-  const form = await renderTemplate('/modules/hey-wait/templates/hud.hbs', {
+  const form = await renderTemplate('/modules/hey-wait/src/templates/hud.hbs', {
     isNotTriggered: !tile.data?.flags?.['hey-wait']?.triggered,
   });
   html.find('.col.right').prepend(form);

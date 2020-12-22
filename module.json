@@ -8,7 +8,7 @@
     {
       "lang": "en",
       "name": "English",
-      "path": "lang/en.json"
+      "path": "src/lang/en.json"
     }
   ],
   "esmodules": [
