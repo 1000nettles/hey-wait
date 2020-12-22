@@ -24,13 +24,13 @@ export default class Collision {
    *   If the Tile and Token collide.
    */
   checkTileTokenCollision(tile, token) {
-    const tileMaxX = tile.width + tile.x;
-    const tileMaxY = tile.height + tile.y;
+    const tileMaxX = tile.data.width + tile.data.x;
+    const tileMaxY = tile.data.height + tile.data.y;
 
     const tokenX = token.x + (token.width * this.gridSize) / 2;
     const tokenY = token.y + (token.height * this.gridSize) / 2;
 
-    return (tokenX >= tile.x && tokenY >= tile.y)
+    return (tokenX >= tile.data.x && tokenY >= tile.data.y)
       && (tokenX <= tileMaxX && tokenY <= tileMaxY);
   }
 }

@@ -10,6 +10,7 @@
 import registerSettings from './module/settings';
 import ControlsGenerator from './module/controlsGenerator';
 import Collision from './module/collision';
+import Triggering from './module/triggering';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -32,6 +33,11 @@ import Collision from './module/collision';
  * Our Collision instance.
  */
 let collision;
+
+/**
+ * Our Triggering instance.
+ */
+let triggering;
 
 function isHeyWaitTile(tile) {
   if (tile.data?._id) {
@@ -68,6 +74,7 @@ Hooks.once('setup', () => {
 
 Hooks.on('canvasReady', () => {
   collision = new Collision(canvas.grid.size);
+  triggering = new Triggering(collision);
 });
 
 /* ------------------------------------ */
@@ -112,7 +119,7 @@ Hooks.on('preUpdateTile', (scene, data, delta) => {
   }
 });
 
-Hooks.on('updateToken', (scene, entity, delta) => {
+Hooks.on('updateToken', async (scene, token, delta) => {
   // Exit early if there's no relevant updates. Specifically, if the token
   // has not moved or the game is actually paused.
   if (
@@ -122,30 +129,27 @@ Hooks.on('updateToken', (scene, entity, delta) => {
     return;
   }
 
-  canvas.tiles.placeables.forEach((tile) => {
-    const isHeyWait = Boolean(tile.data?.flags?.['hey-wait']?.enabled);
-    if (!isHeyWait) {
-      return;
+  canvas.tiles.placeables.every((tile) => {
+    const isTriggered = triggering.handleTokenTriggering(token, tile);
+
+    if (isTriggered) {
+      // Execute canvas functionality like pausing the game and panning
+      // over to the player.
+      game.togglePause(true, true);
+      canvas.animatePan({
+        x: token.x,
+        y: token.y,
+        scale: Math.max(1, canvas.stage.scale.x),
+        duration: 1000,
+      });
+
+      // Return false to break out of the `every` loop. This is actually
+      // successful and the functionality should have been executed at this
+      // point.
+      return false;
     }
 
-    const hasBeenTriggered = Boolean(tile.data?.flags?.['hey-wait']?.triggered);
-    if (hasBeenTriggered) {
-      return;
-    }
-
-    if (!collision.checkTileTokenCollision(tile, entity)) {
-      return;
-    }
-
-    // Update the tile to reflect that it has been triggered.
-    tile.data.img = 'modules/hey-wait/img/hey_wait_green.png';
-    tile.data.flags['hey-wait'].triggered = true;
-    tile.update(tile.data, { diff: false });
-
-    game.togglePause(true, true);
-    canvas.animatePan({
-      x: entity.x, y: entity.y, scale: Math.max(1, canvas.stage.scale.x), duration: 1000,
-    });
+    return true;
   });
 });
 
