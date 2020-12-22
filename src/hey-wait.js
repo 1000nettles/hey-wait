@@ -106,6 +106,16 @@ Hooks.on('preCreateTile', (scene, data) => {
 });
 
 Hooks.on('preUpdateTile', (scene, data, delta) => {
+  // Ensure that Hey, Wait! tiles cannot be rotated.
+  // Probably temporary, our logic for collision doesn't take into account
+  // rotations.
+  if (
+    data?.flags?.['hey-wait']?.enabled
+    && delta?.rotation !== undefined
+  ) {
+    delta.rotation = 0;
+  }
+
   // Only update images if we're dealing with newly triggered or not triggered
   // Hey, Wait! tiles.
   if (typeof delta?.flags?.['hey-wait']?.triggered === 'undefined') {
@@ -192,8 +202,12 @@ Hooks.on('renderTileConfig', (config) => {
   // Hide the file picker and notes for Hey, Wait! tiling...
   const tileSpriteInputEl = jQuery(config.form).find('input[name="img"]');
   const tileSpriteGroupEl = tileSpriteInputEl.closest('.form-group');
+  const rotationGroupEl = jQuery(config.form)
+    .find('input[name="rotation"]')
+    .closest('.form-group');
   const tileSpriteNotesEl = tileSpriteGroupEl.prev('.notes');
   tileSpriteGroupEl.hide();
+  rotationGroupEl.hide();
   tileSpriteNotesEl.hide();
 
   tileSpriteInputEl.val('modules/hey-wait/img/hey_wait_red.png');

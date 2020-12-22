@@ -22,7 +22,7 @@ export default class TileAuditor {
       if (!tile.data?.flags?.['hey-wait']?.enabled) {
         return false;
       }
-    } else if (activeTool !== 'heyWaitTile') {
+    } else if (activeTool && activeTool !== 'heyWaitTile') {
       // This is in a situation where we're placing a new tile and it's a
       // Hey, Wait! tile, but we don't have flags or an ID setup yet.
       return false;
