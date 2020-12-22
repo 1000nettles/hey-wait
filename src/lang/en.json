@@ -1,4 +1,6 @@
 {
-  "HEYWAIT.CONTROLS.TOOLS.HEYWAITTILE": "Place \"Hey, Wait!\" Tile",
+  "HEYWAIT.SETTINGS.restrictGmName": "Restrict GM from Triggering Tiles",
+  "HEYWAIT.SETTINGS.restrictGmHint": "Triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM",
+  "HEYWAIT.CONTROLS.TOOLS.heyWaitTile": "Place \"Hey, Wait!\" Tile",
   "HEYWAIT.TEMPLATE.isNotTriggered": "Toggle \"Hey, Wait!\" Triggered State"
 }

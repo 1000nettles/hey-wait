@@ -137,15 +137,15 @@ export default class SocketController {
           }
 
           await scene.view();
-
-          const tile = this.canvas.tiles.get(data.tileId);
-
-          if (!tile) {
-            console.error(`hey-wait | Could not find a tile with ID ${data.tileId}`);
-          }
-
-          this.triggering.handleTileChange(tile);
         }
+
+        const tile = this.canvas.tiles.get(data.tileId);
+
+        if (!tile) {
+          console.error(`hey-wait | Could not find a tile with ID ${data.tileId}`);
+        }
+
+        this.triggering.handleTileChange(tile);
       } else if (!this._shouldShowInScene(data.sceneId)) {
         return;
       }

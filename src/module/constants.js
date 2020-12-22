@@ -3,6 +3,15 @@
  */
 export default class Constants {
   /**
+   * The name and identifier of the module.
+   *
+   * @return {string}
+   */
+  static get MODULE_NAME() {
+    return 'hey-wait';
+  }
+
+  /**
    * The identifier of the tool in the controls toolbar.
    *
    * @return {string}

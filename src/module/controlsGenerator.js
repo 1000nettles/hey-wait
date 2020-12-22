@@ -25,7 +25,7 @@ export default class ControlsGenerator {
 
     tileControl.tools.push({
       name: Constants.TOOLNAME,
-      title: 'HEYWAIT.CONTROLS.TOOLS.HEYWAITTILE',
+      title: 'HEYWAIT.CONTROLS.TOOLS.heyWaitTile',
       icon: 'fas fa-hand-paper',
     });
   }

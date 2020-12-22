@@ -139,13 +139,25 @@ Hooks.on('updateToken', async (scene, token, delta) => {
     return;
   }
 
+  if (game.user.isGM) {
+    const restrictGm = game.settings.get(
+      Constants.MODULE_NAME,
+      'restrict-gm',
+    );
+
+    // If we are restricting a GM from triggering Hey, Wait! tiles, let's exit
+    // early so they don't move through the triggering flow.
+    if (restrictGm) {
+      return;
+    }
+  }
+
   canvas.tiles.placeables.every((tile) => {
     const isTriggered = triggering.isTriggered(token, tile);
 
     if (isTriggered) {
       // Execute canvas functionality like pausing the game and panning
       // over to the player.
-
       if (game.user.isGM) {
         game.togglePause(true, true);
         triggering.handleTileChange(tile);
