@@ -14,6 +14,7 @@
   "esmodules": [
     "hey-wait.js"
   ],
+  "socket": true,
   "minimumCoreVersion": "0.7.7",
   "compatibleCoreVersion": "0.7.9",
   "url": "https://github.com/1000nettles/hey-wait",

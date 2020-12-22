@@ -1,9 +1,9 @@
-import Triggering from '../../src/module/triggering';
-import Constants from '../../src/module/constants';
+import Triggering from 'module/triggering';
+import Constants from 'module/constants';
 
-it('can exit early when checking if is hey wait tile when handling token triggering', () => {
+it('can exit early when checking if is hey wait tile when checking is triggered', () => {
   const triggering = new Triggering({});
-  let result = triggering.handleTokenTriggering({}, {});
+  let result = triggering.isTriggered({}, {});
   expect(result).toBeFalsy();
 
   const tile = {
@@ -15,11 +15,11 @@ it('can exit early when checking if is hey wait tile when handling token trigger
       },
     },
   };
-  result = triggering.handleTokenTriggering({}, tile);
+  result = triggering.isTriggered({}, tile);
   expect(result).toBeFalsy();
 });
 
-it('can exit early when checking if previously triggered when handling token triggering', () => {
+it('can exit early when checking if previously triggered when checking is triggered', () => {
   const triggering = new Triggering({});
   const tile = {
     data: {
@@ -30,11 +30,11 @@ it('can exit early when checking if previously triggered when handling token tri
       },
     },
   };
-  const result = triggering.handleTokenTriggering({}, tile);
+  const result = triggering.isTriggered({}, tile);
   expect(result).toBeFalsy();
 });
 
-it('can exit early when checking no collision when handling token triggering', () => {
+it('can exit early when checking no collision when checking is triggered', () => {
   const checkTileTokenCollision = jest.fn();
   checkTileTokenCollision.mockReturnValue(false);
 
@@ -53,12 +53,12 @@ it('can exit early when checking no collision when handling token triggering', (
       },
     },
   };
-  const result = triggering.handleTokenTriggering({}, tile);
+  const result = triggering.isTriggered({}, tile);
   expect(result).toBeFalsy();
   expect(checkTileTokenCollision).toHaveBeenCalled();
 });
 
-it('can exit early when checking no collision when handling token triggering', () => {
+it('can exit early when checking no collision when checking is triggered', () => {
   const checkTileTokenCollision = jest.fn();
   checkTileTokenCollision.mockReturnValue(false);
 
@@ -77,21 +77,15 @@ it('can exit early when checking no collision when handling token triggering', (
       },
     },
   };
-  const result = triggering.handleTokenTriggering({}, tile);
+  const result = triggering.isTriggered({}, tile);
   expect(result).toBeFalsy();
   expect(checkTileTokenCollision).toHaveBeenCalled();
 });
 
 it('can do handling token triggering correctly', () => {
-  const checkTileTokenCollision = jest.fn();
-  checkTileTokenCollision.mockReturnValue(true);
   const update = jest.fn();
 
-  const collision = {
-    checkTileTokenCollision,
-  };
-
-  const triggering = new Triggering(collision);
+  const triggering = new Triggering({});
   const tile = {
     data: {
       flags: {
@@ -117,9 +111,8 @@ it('can do handling token triggering correctly', () => {
     update,
   }
 
-  const result = triggering.handleTokenTriggering({}, tile);
+  const result = triggering.handleTileChange(tile);
   expect(result).toBeTruthy();
-  expect(checkTileTokenCollision).toHaveBeenCalledTimes(1);
   expect(update).toHaveBeenCalledTimes(1);
   expect(expectedTile).toEqual(tile);
 });

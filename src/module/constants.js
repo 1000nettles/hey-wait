@@ -19,4 +19,13 @@ export default class Constants {
   static get TILE_GREEN_PATH() {
     return 'modules/hey-wait/img/hey_wait_green.png';
   }
+
+  /**
+   * How long our Canvas panning should last.
+   *
+   * @return {number}
+   */
+  static get CANVAS_PAN_DURATION() {
+    return 1000;
+  }
 }

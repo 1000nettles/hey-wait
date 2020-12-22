@@ -1,5 +1,5 @@
-import TileAuditor from '../../src/module/tileAuditor';
-import Constants from '../../src/module/constants';
+import TileAuditor from 'module/tileAuditor';
+import Constants from 'module/constants';
 
 it('can determine it is not a hey wait tile by an absent flag', () => {
   const auditor = new TileAuditor();

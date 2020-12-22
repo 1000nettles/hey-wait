@@ -12,6 +12,8 @@ import ControlsGenerator from './module/controlsGenerator';
 import Collision from './module/collision';
 import Triggering from './module/triggering';
 import TileAuditor from './module/tileAuditor';
+import Constants from './module/constants';
+import SocketController from './module/socketController';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -45,6 +47,11 @@ let triggering;
  */
 let tileAuditor;
 
+/**
+ * Our SocketController instance.
+ */
+let socketController;
+
 /* ------------------------------------ */
 /* Initialize module                    */
 /* ------------------------------------ */
@@ -56,10 +63,21 @@ Hooks.once('init', async () => {
 /* ------------------------------------ */
 /* Setup module                         */
 /* ------------------------------------ */
-Hooks.on('canvasReady', () => {
+Hooks.on('canvasReady', async () => {
   collision = new Collision(canvas.grid.size);
   triggering = new Triggering(collision);
+
+  // Ensure that we only have a single socket open for our module so we don't
+  // clutter up open sockets when changing scenes (or, more specifically,
+  // rendering new canvases.)
+  if (socketController instanceof SocketController) {
+    await socketController.deactivate();
+  }
+  socketController = new SocketController(game.socket, game, game.user, canvas, triggering);
+
   tileAuditor = new TileAuditor();
+
+  await socketController.init();
 });
 
 /* ------------------------------------ */
@@ -107,24 +125,32 @@ Hooks.on('updateToken', async (scene, token, delta) => {
   if (
     (!delta?.x && !delta?.y)
     || game.paused
-    || !game.user.isGM
   ) {
     return;
   }
 
   canvas.tiles.placeables.every((tile) => {
-    const isTriggered = triggering.handleTokenTriggering(token, tile);
+    const isTriggered = triggering.isTriggered(token, tile);
 
     if (isTriggered) {
       // Execute canvas functionality like pausing the game and panning
       // over to the player.
-      game.togglePause(true, true);
+
+      if (game.user.isGM) {
+        game.togglePause(true, true);
+        triggering.handleTileChange(tile);
+      }
+
+      const { x, y } = token;
+
       canvas.animatePan({
-        x: token.x,
-        y: token.y,
+        x,
+        y,
         scale: Math.max(1, canvas.stage.scale.x),
-        duration: 1000,
+        duration: Constants.CANVAS_PAN_DURATION,
       });
+
+      socketController.emit(x, y, tile.data._id, game.user.viewedScene);
 
       // Return false to break out of the `every` loop. This is actually
       // successful and the functionality should have been executed at this

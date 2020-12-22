@@ -9,16 +9,17 @@ export default class Triggering {
   }
 
   /**
-   * Handle the token triggering Hey, Wait! functionality if it is applicable.
+   * Determine if the tile has been triggered by the token's movement.
    *
    * @param {Token} token
-   *   The Token that potentially will trigger the functionality.
-   * @param {Tile} tile
-   *   The relevant Tile.
-   * @return {Boolean}
-   *   Return triggering took place.
+   *   The Token to check for.
+   * @param tile
+   *   The Tile to check for.
+   *
+   * @return {boolean}
+   *   If the tile has been triggered by the token's movement.
    */
-  handleTokenTriggering(token, tile) {
+  isTriggered(token, tile) {
     if (!this._isHeyWaitTile(tile)) {
       return false;
     }
@@ -31,6 +32,20 @@ export default class Triggering {
       return false;
     }
 
+    return true;
+  }
+
+  /**
+   * Handle the token triggering Hey, Wait! functionality if it is applicable.
+   *
+   * @param {Token} token
+   *   The Token that potentially will trigger the functionality.
+   * @param {Tile} tile
+   *   The relevant Tile.
+   * @return {Boolean}
+   *   Return triggering took place.
+   */
+  handleTileChange(tile) {
     const finalTile = this._adjustTriggeredTile(tile);
 
     finalTile.update(
