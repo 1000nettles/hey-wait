@@ -15,6 +15,12 @@ Start by installing the module, and enabling it for your world. If you click on 
 
 ![Hey, Wait! in the toolbar](img/preview2.jpg)
 
+You can also toggle the triggered state of the Hey, Wait! tile. Right-click on the tile and toggle it like so:
+
+![Hey, Wait! tile toggling](img/preview3.gif)
+
+Note that the visibility button has disappeared. Hey, Wait! tiles are always invisible to players.
+
 ## Settings :ballot_box_with_check:
 
 * **Restrict GM from Triggering Tiles:** If enabled, triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM
