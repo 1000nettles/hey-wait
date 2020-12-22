@@ -1,2 +1,4 @@
 {
+  "HEYWAIT.CONTROLS.TOOLS.HEYWAITTILE": "Place \"Hey, Wait!\" Tile",
+  "HEYWAIT.TEMPLATE.isNotTriggered": "Toggle \"Hey, Wait!\" Triggered State"
 }
