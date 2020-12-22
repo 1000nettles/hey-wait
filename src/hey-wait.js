@@ -9,6 +9,7 @@
 // Import JavaScript modules
 import registerSettings from './module/settings';
 import ControlsGenerator from './module/controlsGenerator';
+import Collision from './module/collision';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -27,31 +28,10 @@ import ControlsGenerator from './module/controlsGenerator';
 /* global renderTemplate */
 /* global setFlag */
 
-function heyWaitInBounds(tile, token) {
-  const maxX = tile.width + tile.x;
-  const maxY = tile.height + tile.y;
-
-  const x = token.x + (token.width * canvas.grid.size) / 2;
-  const y = token.y + (token.height * canvas.grid.size) / 2;
-
-  console.log({
-    tileX: tile.x,
-    tileY: tile.y,
-    maxX,
-    maxY,
-    x,
-    y,
-  });
-
-  if (
-    (x >= tile.x && y >= tile.y)
-    && (x <= maxX && y <= maxY)
-  ) {
-    return true;
-  }
-
-  return false;
-}
+/**
+ * Our Collision instance.
+ */
+let collision;
 
 function isHeyWaitTile(tile) {
   if (tile.data?._id) {
@@ -84,6 +64,10 @@ Hooks.once('init', async () => {
 /* ------------------------------------ */
 Hooks.once('setup', () => {
   // Do anything after initialization but before ready.
+});
+
+Hooks.on('canvasReady', () => {
+  collision = new Collision(canvas.grid.size);
 });
 
 /* ------------------------------------ */
@@ -149,7 +133,7 @@ Hooks.on('updateToken', (scene, entity, delta) => {
       return;
     }
 
-    if (!heyWaitInBounds(tile, entity)) {
+    if (!collision.checkTileTokenCollision(tile, entity)) {
       return;
     }
 
