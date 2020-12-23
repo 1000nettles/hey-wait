@@ -1,7 +1,5 @@
 /* eslint-disable no-console */
 
-import Constants from './constants';
-
 /**
  * A controller for handling socket related operations for our module.
  */
@@ -11,29 +9,20 @@ export default class SocketController {
    *
    * @param {Socket} socket
    *   The current Socket instance.
-   * @param {Game} game
-   *   The current Game instance.
    * @param {User} user
    *   The current User instance.
    * @param {Canvas} canvas
    *   The current Canvas instance.
-   * @param {Triggering} triggering
-   *   The current Triggering instance.
+   * @param {GameChanger} gameChanger
+   *   The current GameChanger instance.
    */
-  constructor(socket, game, user, canvas, triggering) {
+  constructor(socket, user, gameChanger) {
     /**
      * The current WebSocket instance.
      *
-     * @type {WebSocket}
+     * @type {Object}
      */
     this.socket = socket;
-
-    /**
-     * The current Game instance.
-     *
-     * @type {Game}
-     */
-    this.game = game;
 
     /**
      * The current WebSocket instance.
@@ -43,18 +32,11 @@ export default class SocketController {
     this.user = user;
 
     /**
-     * The current Canvas instance.
+     * The current GameChanger instance.
      *
-     * @type {Canvas}
+     * @type {GameChanger}
      */
-    this.canvas = canvas;
-
-    /**
-     * The current Triggering instance.
-     *
-     * @type {Triggering}
-     */
-    this.triggering = triggering;
+    this.gameChanger = gameChanger;
 
     /**
      * The name of our socket.
@@ -83,7 +65,7 @@ export default class SocketController {
   }
 
   /**
-   * Emit any canvas pan operations that need to take place to players.
+   * Emit any Hey, Wait! events that occurred.
    *
    * @param {number} x
    *   X coordinate of where the canvas should pan to.
@@ -111,9 +93,8 @@ export default class SocketController {
   /**
    * Listen for events on our module's socket.
    *
-   * Any event received will subsequently pan the canvas to the specified spot.
-   * If the GM is on another scene, they will be moved to the scene where
-   * the Hey, Wait! trigger occurred.
+   * Any event received will subsequently call the GameChanger to ensure the
+   * event takes place in the current user's game.
    *
    * @return {Promise<void>}
    *
@@ -123,39 +104,15 @@ export default class SocketController {
     this.socket.on(this.socketName, async (data) => {
       console.debug(`hey-wait | Emission received on ${this.socketName}`);
 
-      if (this.user.isGM) {
-        // The GM might be off on another scene, so if something has triggered
-        // on a tile, let's get the GM to pause the action for them.
-        this.game.togglePause(true, true);
-
-        // Bring the GM to the scene if they are not here.
-        if (this.user.viewedScene !== data.sceneId) {
-          const scene = this.game.scenes.get(data.sceneId);
-
-          if (!scene) {
-            console.error(`hey-wait | Could not find a scene with ID ${data.sceneId}`);
-          }
-
-          await scene.view();
-        }
-
-        const tile = this.canvas.tiles.get(data.tileId);
-
-        if (!tile) {
-          console.error(`hey-wait | Could not find a tile with ID ${data.tileId}`);
-        }
-
-        this.triggering.handleTileChange(tile);
-      } else if (!this._shouldShowInScene(data.sceneId)) {
-        return;
+      try {
+        await this.gameChanger.execute(
+          data.tileId,
+          { x: data.x, y: data.y },
+          data.sceneId,
+        );
+      } catch (e) {
+        console.error(`hey-wait | ${e.name}: ${e.message}`);
       }
-
-      this.canvas.animatePan({
-        x: data.x,
-        y: data.y,
-        scale: Math.max(1, this.canvas.stage.scale.x),
-        duration: Constants.CANVAS_PAN_DURATION,
-      });
     });
   }
 
@@ -168,22 +125,5 @@ export default class SocketController {
    */
   async _removeListener() {
     this.socket.off(this.socketName);
-  }
-
-  /**
-   * Determine if we should be executing anything on the provided scene ID.
-   *
-   * This checks if the current user is viewing the associated scene or not.
-   *
-   * @param {string} sceneId
-   *   The provided scene ID that the action took place on.
-   *
-   * @return {boolean}
-   *   If we should show in the provided scene or not.
-   *
-   * @private
-   */
-  _shouldShowInScene(sceneId) {
-    return (this.user.viewedScene === sceneId);
   }
 }

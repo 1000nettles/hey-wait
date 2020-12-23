@@ -10,7 +10,7 @@
 
 ## What Does This Look Like? :eyes:
 
-On the left, we see the GM's screen where they have placed a Hey, Wait! tile (shown in red.) On the right, we see the player's screen, where they are unable to see the tile. After a collision into the Hey, Wait! tile, the game pauses and pans over to the player who triggered the tile. When a tile is triggered, it turns green.
+On the left, we see the GM's screen where they have placed a Hey, Wait! tile (shown in red.) On the right, we see the player's screen, where they are unable to see the tile. After a collision into the Hey, Wait! tile, the game pauses and pans over to the player who triggered the tile. When a tile is triggered, it turns green. Hey, Wait! also picks up if a player has dragged their token across the scene.
 
 ![Hey, Wait! preview](img/preview1.gif)
 
@@ -35,7 +35,6 @@ Note that the visibility button has disappeared. Hey, Wait! tiles are always inv
 ## Known Limitations :x:
 
 * No rotation allowed on Hey, Wait! tiles
-* On some grid sizes, drawing a Hey, Wait! tile in a partial grid square may not trigger on token movement into that square
 * Accessibility issues - red and green aren't the best colours to use here. Eventually we'd like to move to the Hey, Wait! tiles having some sort of pattern in them denoting the tile's triggered status
 
 ## Future Planned Features :crystal_ball:

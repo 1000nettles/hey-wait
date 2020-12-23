@@ -1,9 +1,8 @@
 import Triggering from 'module/triggering';
-import Constants from 'module/constants';
 
 it('can exit early when checking if is hey wait tile when checking is triggered', () => {
   const triggering = new Triggering({});
-  let result = triggering.isTriggered({}, {});
+  let result = triggering.isTileTriggered({}, {}, {});
   expect(result).toBeFalsy();
 
   const tile = {
@@ -15,7 +14,7 @@ it('can exit early when checking if is hey wait tile when checking is triggered'
       },
     },
   };
-  result = triggering.isTriggered({}, tile);
+  result = triggering.isTileTriggered({}, tile);
   expect(result).toBeFalsy();
 });
 
@@ -30,7 +29,7 @@ it('can exit early when checking if previously triggered when checking is trigge
       },
     },
   };
-  const result = triggering.isTriggered({}, tile);
+  const result = triggering.isTileTriggered({}, tile, {});
   expect(result).toBeFalsy();
 });
 
@@ -53,20 +52,16 @@ it('can exit early when checking no collision when checking is triggered', () =>
       },
     },
   };
-  const result = triggering.isTriggered({}, tile);
+  const result = triggering.isTileTriggered({}, tile, {});
   expect(result).toBeFalsy();
   expect(checkTileTokenCollision).toHaveBeenCalled();
 });
 
-it('can exit early when checking no collision when checking is triggered', () => {
-  const checkTileTokenCollision = jest.fn();
-  checkTileTokenCollision.mockReturnValue(false);
+it('can exit early if no tile triggering took place', () => {
+  const mockCollision = {};
+  mockCollision.checkTileTokenCollision = jest.fn().mockReturnValue(false);
 
-  const collision = {
-    checkTileTokenCollision,
-  };
-
-  const triggering = new Triggering(collision);
+  const triggering = new Triggering(mockCollision);
   const tile = {
     data: {
       flags: {
@@ -77,15 +72,23 @@ it('can exit early when checking no collision when checking is triggered', () =>
       },
     },
   };
-  const result = triggering.isTriggered({}, tile);
+
+  const tokenPos = {x: 1, y: 1};
+  const result = triggering.isTileTriggered({}, tile, tokenPos);
+
+  expect(mockCollision.checkTileTokenCollision).toHaveBeenCalledWith(
+    tile,
+    {},
+    tokenPos
+  );
   expect(result).toBeFalsy();
-  expect(checkTileTokenCollision).toHaveBeenCalled();
 });
 
-it('can do handling token triggering correctly', () => {
-  const update = jest.fn();
+it('can determine a tile has been triggered', () => {
+  const mockCollision = {};
+  mockCollision.checkTileTokenCollision = jest.fn().mockReturnValue(true);
 
-  const triggering = new Triggering({});
+  const triggering = new Triggering(mockCollision);
   const tile = {
     data: {
       flags: {
@@ -95,24 +98,15 @@ it('can do handling token triggering correctly', () => {
         },
       },
     },
-    update,
   };
 
-  const expectedTile = {
-    data: {
-      flags: {
-        'hey-wait': {
-          enabled: true,
-          triggered: true,
-        },
-      },
-      img: Constants.TILE_GREEN_PATH,
-    },
-    update,
-  }
+  const tokenPos = {x: 1, y: 1};
+  const result = triggering.isTileTriggered({}, tile, tokenPos);
 
-  const result = triggering.handleTileChange(tile);
+  expect(mockCollision.checkTileTokenCollision).toHaveBeenCalledWith(
+    tile,
+    {},
+    tokenPos
+  );
   expect(result).toBeTruthy();
-  expect(update).toHaveBeenCalledTimes(1);
-  expect(expectedTile).toEqual(tile);
 });

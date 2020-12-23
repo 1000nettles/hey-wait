@@ -14,6 +14,8 @@ import Triggering from './module/triggering';
 import TileAuditor from './module/tileAuditor';
 import Constants from './module/constants';
 import SocketController from './module/socketController';
+import TokenUpdateCoordinator from './module/tokenUpdateCoordinator';
+import GameChanger from './module/gameChanger';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -52,6 +54,16 @@ let tileAuditor;
  */
 let socketController;
 
+/**
+ * Our GameChanger instance.
+ */
+let gameChanger;
+
+/**
+ * Our TokenUpdateCoordinator instance.
+ */
+let tokenUpdateCoordinator;
+
 /* ------------------------------------ */
 /* Initialize module                    */
 /* ------------------------------------ */
@@ -66,6 +78,7 @@ Hooks.once('init', async () => {
 Hooks.on('canvasReady', async () => {
   collision = new Collision(canvas.grid.size);
   triggering = new Triggering(collision);
+  gameChanger = new GameChanger(game, canvas);
 
   // Ensure that we only have a single socket open for our module so we don't
   // clutter up open sockets when changing scenes (or, more specifically,
@@ -73,9 +86,16 @@ Hooks.on('canvasReady', async () => {
   if (socketController instanceof SocketController) {
     await socketController.deactivate();
   }
-  socketController = new SocketController(game.socket, game, game.user, canvas, triggering);
+  socketController = new SocketController(game.socket, game.user, gameChanger);
 
   tileAuditor = new TileAuditor();
+  tokenUpdateCoordinator = new TokenUpdateCoordinator(
+    game,
+    canvas,
+    socketController,
+    triggering,
+    gameChanger,
+  );
 
   await socketController.init();
 });
@@ -129,11 +149,15 @@ Hooks.on('preUpdateTile', (scene, data, delta) => {
   }
 });
 
+Hooks.on('preUpdateToken', async (scene, token) => {
+  tokenUpdateCoordinator.registerTokenInitPos(token);
+});
+
 Hooks.on('updateToken', async (scene, token, delta) => {
   // Exit early if there's no relevant updates. Specifically, if the token
   // has not moved or the game is actually paused.
   if (
-    (!delta?.x && !delta?.y)
+    (delta?.x === undefined && delta?.y === undefined)
     || game.paused
   ) {
     return;
@@ -152,36 +176,10 @@ Hooks.on('updateToken', async (scene, token, delta) => {
     }
   }
 
-  canvas.tiles.placeables.every((tile) => {
-    const isTriggered = triggering.isTriggered(token, tile);
-
-    if (isTriggered) {
-      // Execute canvas functionality like pausing the game and panning
-      // over to the player.
-      if (game.user.isGM) {
-        game.togglePause(true, true);
-        triggering.handleTileChange(tile);
-      }
-
-      const { x, y } = token;
-
-      canvas.animatePan({
-        x,
-        y,
-        scale: Math.max(1, canvas.stage.scale.x),
-        duration: Constants.CANVAS_PAN_DURATION,
-      });
-
-      socketController.emit(x, y, tile.data._id, game.user.viewedScene);
-
-      // Return false to break out of the `every` loop. This is actually
-      // successful and the functionality should have been executed at this
-      // point.
-      return false;
-    }
-
-    return true;
-  });
+  await tokenUpdateCoordinator.coordinateUpdate(
+    token,
+    canvas.tiles.placeables,
+  );
 });
 
 Hooks.on('getSceneControlButtons', (controls) => {

@@ -1,3 +1,5 @@
+/* global Ray */
+
 /**
  * A class to determine collision between relevant Entitys.
  */
@@ -19,18 +21,67 @@ export default class Collision {
    *   The Tile to check.
    * @param {Token} token
    *   The Token to check.
+   * @param {x,y} initTokenPos
+   *   The initial position of the Token before it was updated. X and Y values.
    *
    * @return {boolean}
    *   If the Tile and Token collide.
    */
-  checkTileTokenCollision(tile, token) {
-    const tileMaxX = tile.data.width + tile.data.x;
-    const tileMaxY = tile.data.height + tile.data.y;
+  checkTileTokenCollision(tile, token, initTokenPos) {
+    // 1. Get all the tile's vertices. X and Y are position at top-left corner
+    // of tile.
+    const tileX1 = tile.data.x;
+    const tileY1 = tile.data.y;
+    const tileX2 = tile.data.x + tile.data.width;
+    const tileY2 = tile.data.y + tile.data.height;
 
-    const tokenX = token.x + (token.width * this.gridSize) / 2;
-    const tokenY = token.y + (token.height * this.gridSize) / 2;
+    const tokenCanvasWidth = token.width * this.gridSize;
+    const tokenCanvasHeight = token.height * this.gridSize;
 
-    return (tokenX >= tile.data.x && tokenY >= tile.data.y)
-      && (tokenX <= tileMaxX && tokenY <= tileMaxY);
+    const tokenX1 = initTokenPos.x + (tokenCanvasWidth / 2);
+    const tokenY1 = initTokenPos.y + (tokenCanvasHeight / 2);
+    const tokenX2 = token.x + (tokenCanvasWidth / 2);
+    const tokenY2 = token.y + (tokenCanvasHeight / 2);
+
+    // 2. Create a new Ray for the token, from its starting position to its
+    // destination.
+    const tokenRay = new Ray(
+      {
+        x: tokenX1,
+        y: tokenY1,
+      },
+      {
+        x: tokenX2,
+        y: tokenY2,
+      },
+    );
+
+    // 3. Create four intersection checks, one for each line making up the
+    // tile rectangle. If any of these pass, that means it has intersected at
+    // some point.
+    return Boolean(tokenRay.intersectSegment([
+      tileX1,
+      tileY1,
+      tileX2,
+      tileY1,
+    ]))
+      || Boolean(tokenRay.intersectSegment([
+        tileX2,
+        tileY1,
+        tileX2,
+        tileY2,
+      ]))
+      || Boolean(tokenRay.intersectSegment([
+        tileX2,
+        tileY2,
+        tileX1,
+        tileY2,
+      ]))
+      || Boolean(tokenRay.intersectSegment([
+        tileX1,
+        tileY2,
+        tileX1,
+        tileY1,
+      ]));
   }
 }
