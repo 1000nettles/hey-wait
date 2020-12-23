@@ -1,6 +1,6 @@
 # Hey, Wait! :raised_hand:
 
-![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.1.1.zip?style=flat-square)
+![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.2.0.zip?style=flat-square)
 ![Issues](https://img.shields.io/github/issues/1000nettles/hey-wait?style=flat-square)
 ![MIT License](https://img.shields.io/github/license/1000nettles/hey-wait?style=flat-square)
 
