@@ -54,7 +54,7 @@ export default class GameChanger {
     }
 
     tile.data.flags['hey-wait'].triggered = true;
-    tile.data.img = Constants.TILE_GREEN_PATH;
+    tile.data.img = Constants.TILE_GO_PATH;
 
     tile.update(
       tile.data,

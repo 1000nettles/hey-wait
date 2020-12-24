@@ -16,6 +16,7 @@ import Constants from './module/constants';
 import SocketController from './module/socketController';
 import TokenUpdateCoordinator from './module/tokenUpdateCoordinator';
 import GameChanger from './module/gameChanger';
+import Patterner from './module/patterner';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -26,9 +27,12 @@ import GameChanger from './module/gameChanger';
 /* global CONFIG */
 /* global Hooks */
 /* global Scene */
+/* global PIXI */
 /* global canvas */
+/* global loadTexture */
 /* global game */
 /* global jQuery */
+/* global getProperty */
 /* global getFlag */
 /* global mergeObject */
 /* global renderTemplate */
@@ -64,6 +68,11 @@ let gameChanger;
  */
 let tokenUpdateCoordinator;
 
+/**
+ * Our Patterner instance.
+ */
+let patterner;
+
 /* ------------------------------------ */
 /* Initialize module                    */
 /* ------------------------------------ */
@@ -97,7 +106,21 @@ Hooks.on('canvasReady', async () => {
     gameChanger,
   );
 
+  patterner = new Patterner();
+
   await socketController.init();
+
+  // Once the canvas is ready, ensure our Hey, Wait! tiles are using the correct
+  // patterning instead of a static image.
+  await canvas.tiles.placeables.forEach(async (tile) => {
+    if (
+      !tile.data?.flags?.['hey-wait']?.enabled
+    ) {
+      return;
+    }
+
+    patterner.addPatterningToTile(tile);
+  });
 });
 
 /* ------------------------------------ */
@@ -135,18 +158,32 @@ Hooks.on('preUpdateTile', (scene, data, delta) => {
   ) {
     delta.rotation = 0;
   }
+});
 
-  // Only update images if we're dealing with newly triggered or not triggered
-  // Hey, Wait! tiles.
-  if (typeof delta?.flags?.['hey-wait']?.triggered === 'undefined') {
+Hooks.on('createTile', async (scene, data) => {
+  if (
+    !data?.flags?.['hey-wait']?.enabled
+  ) {
     return;
   }
 
-  if (delta.flags['hey-wait'].triggered) {
-    delta.img = 'modules/hey-wait/src/img/hey_wait_green.png';
-  } else {
-    delta.img = 'modules/hey-wait/src/img/hey_wait_red.png';
+  // As the hook doesn't pass the full Tile object, get it from the canvas
+  // and pass it to be patterned.
+  const createdTile = canvas.tiles.get(data._id);
+  await patterner.addPatterningToTile(createdTile);
+});
+
+Hooks.on('updateTile', async (scene, data) => {
+  if (
+    !data?.flags?.['hey-wait']?.enabled
+  ) {
+    return;
   }
+
+  // As the hook doesn't pass the full Tile object, get it from the canvas
+  // and pass it to be patterned.
+  const updatedTile = canvas.tiles.get(data._id);
+  await patterner.addPatterningToTile(updatedTile);
 });
 
 Hooks.on('preUpdateToken', async (scene, token) => {
@@ -220,7 +257,7 @@ Hooks.on('renderTileConfig', (config) => {
   rotationGroupEl.hide();
   tileSpriteNotesEl.hide();
 
-  tileSpriteInputEl.val('modules/hey-wait/src/img/hey_wait_red.png');
+  tileSpriteInputEl.val(Constants.TILE_STOP_PATH);
 
   const newNotes = jQuery('<p>')
     .attr('class', 'notes');
@@ -252,7 +289,7 @@ Hooks.on('renderTileHUD', async (tileHud, html) => {
 
   // Append Hey, Wait! template for the HUD. We need to specify `isNotTriggered`
   // due to Handlebars not being able to inverse logic in a conditional.
-  const form = await renderTemplate('/modules/hey-wait/src/templates/hud.hbs', {
+  const form = await renderTemplate(Constants.TEMPLATE_HUD_PATH, {
     isNotTriggered: !tile.data?.flags?.['hey-wait']?.triggered,
   });
   html.find('.col.right').prepend(form);

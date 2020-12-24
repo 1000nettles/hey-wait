@@ -21,12 +21,75 @@ export default class Constants {
   }
 
   /**
-   * The filepath for the green tile image.
+   * The filepath to the HUD template.
    *
    * @return {string}
    */
-  static get TILE_GREEN_PATH() {
-    return 'modules/hey-wait/src/img/hey_wait_green.png';
+  static get TEMPLATE_HUD_PATH() {
+    return '/modules/hey-wait/src/templates/hud.hbs';
+  }
+
+  /**
+   * The filepath for the "Hey, Wait! Stop" tile image.
+   *
+   * @return {string}
+   */
+  static get TILE_STOP_PATH() {
+    return 'modules/hey-wait/src/img/hey_wait_stop.jpg';
+  }
+
+  /**
+   * The width of the "Hey, Wait! Stop" tile.
+   *
+   * @return {number}
+   */
+  static get TILE_STOP_WIDTH() {
+    return 200;
+  }
+
+  /**
+   * The height of the "Hey, Wait! Stop" tile.
+   *
+   * @return {number}
+   */
+  static get TILE_STOP_HEIGHT() {
+    return 167;
+  }
+
+  /**
+   * The filepath for the "Hey, Wait! Go" tile image.
+   *
+   * @return {string}
+   */
+  static get TILE_GO_PATH() {
+    return 'modules/hey-wait/src/img/hey_wait_go.jpg';
+  }
+
+  /**
+   * The width of the "Hey, Wait! Go" tile.
+   *
+   * @return {number}
+   */
+  static get TILE_GO_WIDTH() {
+    return 222;
+  }
+
+  /**
+   * The height of the "Hey, Wait! Go" tile.
+   *
+   * @return {number}
+   */
+  static get TILE_GO_HEIGHT() {
+    return 160;
+  }
+
+  /**
+   * The filepath for the fallback tile image.
+   *
+   * @return {string}
+   */
+  static get TILE_FALLBACK_PATH() {
+    return 'icons/svg/hazard.svg';
   }
 
   /**
