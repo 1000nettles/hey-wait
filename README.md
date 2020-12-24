@@ -48,3 +48,4 @@ Note that the visibility button has disappeared. Hey, Wait! tiles are always inv
 ## Acknowledgements :wave:
 
 * Thanks to [Game-icons.net](https://game-icons.net) for the use of the ["Halt" icon](https://game-icons.net/1x1/skoll/halt.html), and the ["Confirmed" icon](https://game-icons.net/1x1/delapouite/confirmed.html``)
+* Thanks to [Toptal](https://www.toptal.com) for their ["Toptal Subtle Patterns"](https://www.toptal.com/designers/subtlepatterns/) - used within the backgrounds of the Hey, Wait! tiles
