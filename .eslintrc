@@ -1,6 +1,10 @@
 {
   "parser": "babel-eslint",
+  "env": {
+    "jest/globals": true
+  },
   "extends": ["airbnb"],
+  "plugins": ["jest"],
   "rules": {
     "class-methods-use-this": "off",
     "import/no-unresolved": "off",

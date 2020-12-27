@@ -5,7 +5,7 @@
   "description": "\"Hey, Wait!\" is a FoundryVTT module allowing a GM to place \"event triggers\" on a scene.",
   "scripts": {
     "build": "npx webpack --config webpack.config.js",
-    "lint": "npx eslint --fix ./src",
+    "lint": "npx eslint --fix ./src && npx eslint --fix ./tests",
     "test": "jest --silent --verbose ./tests",
     "watch": "npx webpack --config webpack.config.js --watch"
   },

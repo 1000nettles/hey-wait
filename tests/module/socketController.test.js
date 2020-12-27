@@ -43,10 +43,7 @@ it('should initialize the socket listener and listen', async () => {
 });
 
 it('should initialize the socket listener and throw and error when executing on game changer', async () => {
-  let socketOnArgs;
-
   mockSocket.on = jest.fn((...args) => {
-    socketOnArgs = args;
     const callbackData = {
       x: 1,
       y: 1,
@@ -61,7 +58,7 @@ it('should initialize the socket listener and throw and error when executing on 
 
   mockGameChanger.execute = () => {
     throw new Error('an_error');
-  }
+  };
   console.error = jest.fn();
 
   await socketController.init();

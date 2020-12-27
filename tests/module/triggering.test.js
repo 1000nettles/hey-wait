@@ -73,13 +73,13 @@ it('can exit early if no tile triggering took place', () => {
     },
   };
 
-  const tokenPos = {x: 1, y: 1};
+  const tokenPos = { x: 1, y: 1 };
   const result = triggering.isTileTriggered({}, tile, tokenPos);
 
   expect(mockCollision.checkTileTokenCollision).toHaveBeenCalledWith(
     tile,
     {},
-    tokenPos
+    tokenPos,
   );
   expect(result).toBeFalsy();
 });
@@ -100,13 +100,13 @@ it('can determine a tile has been triggered', () => {
     },
   };
 
-  const tokenPos = {x: 1, y: 1};
+  const tokenPos = { x: 1, y: 1 };
   const result = triggering.isTileTriggered({}, tile, tokenPos);
 
   expect(mockCollision.checkTileTokenCollision).toHaveBeenCalledWith(
     tile,
     {},
-    tokenPos
+    tokenPos,
   );
   expect(result).toBeTruthy();
 });
