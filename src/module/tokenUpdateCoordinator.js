@@ -8,23 +8,11 @@ export default class TokenUpdateCoordinator {
   /**
    * TokenUpdateCoordinator constructor.
    *
-   * @param {Game} game
-   *   The injected Game dependency.
-   * @param {Canvas} canvas
-   *   The injected Canvas dependency.
-   * @param {SocketController} socketController
-   *   The injected SocketController dependency.
    * @param {Triggering} triggering
    *   The injected Triggering dependency.
-   * @param {GameChanger} gameChanger
-   *   The injected GameChanger dependency.
    */
-  constructor(game, canvas, socketController, triggering, gameChanger) {
-    this.game = game;
-    this.canvas = canvas;
-    this.socketController = socketController;
+  constructor(triggering) {
     this.triggering = triggering;
-    this.gameChanger = gameChanger;
 
     /**
      * Keep track of the Token's initial position between updates.
@@ -65,10 +53,14 @@ export default class TokenUpdateCoordinator {
    *
    * @param {Token} token
    *   The Token getting updated.
-   * @param tiles
+   * @param {Array} tiles
    *   All of the potential tiles to check for triggers.
+   * @param {string} viewedScene
+   *   The ID of the currently viewed scene.
    */
-  async coordinateUpdate(token, tiles) {
+  async coordinateUpdate(token, tiles, viewedScene) {
+    const t0 = performance.now();
+
     // Let's find the previously stored Token initial position.
     const initPos = this.tokenInitPos.get(token._id);
 
@@ -79,55 +71,21 @@ export default class TokenUpdateCoordinator {
       return;
     }
 
-    const t0 = performance.now();
+    const wasTriggered = await this.triggering.handleTileTriggering(
+      tiles,
+      token,
+      initPos,
+      viewedScene,
+    );
 
-    tiles.every(async (tile) => {
-      if (!this.triggering.isTileTriggered(token, tile, initPos)) {
-        return true;
-      }
-
-      await this._handleTrigger(token, tile);
-
-      return false;
-    });
+    if (wasTriggered) {
+      // Do any animations or sounds relating to the token here.
+    }
 
     this._cleanQueuedTokenInitPos(token._id);
     const t1 = performance.now();
 
     console.debug(`hey-wait | \`coordinateUpdate\` took ${t1 - t0}ms.`);
-  }
-
-  /**
-   * Execute triggered functionality like pausing the game and panning over
-   * to the token that triggered the tile.
-   *
-   * @param {Token} token
-   *   The token that triggered the tile.
-   * @param {Tile} tile
-   *   The tile that was triggered.
-   *
-   * @private
-   */
-  async _handleTrigger(token, tile) {
-    const { x, y } = token;
-
-    try {
-      await this.gameChanger.execute(
-        tile.data._id,
-        { x, y },
-        this.game.user.viewedScene,
-      );
-    } catch (e) {
-      console.error(`hey-wait | ${e.name}: ${e.message}`);
-    }
-
-    // Emit the triggering to other users to their games can adjust accordingly.
-    await this.socketController.emit(
-      x,
-      y,
-      tile.data._id,
-      this.game.user.viewedScene,
-    );
   }
 
   /**

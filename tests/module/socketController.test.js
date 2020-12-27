@@ -1,5 +1,7 @@
 import SocketController from 'module/socketController';
 
+/* eslint-disable no-console */
+
 let mockSocket;
 let mockUser;
 let mockGameChanger;

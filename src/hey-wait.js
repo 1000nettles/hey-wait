@@ -86,7 +86,6 @@ Hooks.once('init', async () => {
 /* ------------------------------------ */
 Hooks.on('canvasReady', async () => {
   collision = new Collision(canvas.grid.size);
-  triggering = new Triggering(collision);
   gameChanger = new GameChanger(game, canvas);
 
   // Ensure that we only have a single socket open for our module so we don't
@@ -97,13 +96,10 @@ Hooks.on('canvasReady', async () => {
   }
   socketController = new SocketController(game.socket, game.user, gameChanger);
 
+  triggering = new Triggering(gameChanger, socketController, collision);
   tileAuditor = new TileAuditor();
   tokenUpdateCoordinator = new TokenUpdateCoordinator(
-    game,
-    canvas,
-    socketController,
     triggering,
-    gameChanger,
   );
 
   patterner = new Patterner();
@@ -216,6 +212,7 @@ Hooks.on('updateToken', async (scene, token, delta) => {
   await tokenUpdateCoordinator.coordinateUpdate(
     token,
     canvas.tiles.placeables,
+    game.user.viewedScene,
   );
 });
 
