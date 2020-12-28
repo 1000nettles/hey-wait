@@ -17,6 +17,8 @@ import SocketController from './module/socketController';
 import TokenUpdateCoordinator from './module/tokenUpdateCoordinator';
 import GameChanger from './module/gameChanger';
 import Patterner from './module/patterner';
+import Animator from './module/animator';
+import TokenCalculator from './module/tokenCalculator';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -24,9 +26,11 @@ import Patterner from './module/patterner';
 /* eslint-disable no-param-reassign */
 /* eslint-disable func-names */
 /* global Canvas */
+/* global CanvasAnimation */
 /* global CONFIG */
 /* global Hooks */
 /* global Scene */
+/* global TilesLayer */
 /* global PIXI */
 /* global canvas */
 /* global loadTexture */
@@ -73,6 +77,13 @@ let tokenUpdateCoordinator;
  */
 let patterner;
 
+let tokenCalculator;
+
+/**
+ * Our Animator instance.
+ */
+let animator;
+
 /* ------------------------------------ */
 /* Initialize module                    */
 /* ------------------------------------ */
@@ -98,8 +109,17 @@ Hooks.on('canvasReady', async () => {
 
   triggering = new Triggering(gameChanger, socketController, collision);
   tileAuditor = new TileAuditor();
+
+  const layer = canvas.layers.find(
+    (targetLayer) => targetLayer instanceof TilesLayer,
+  );
+
+  tokenCalculator = new TokenCalculator();
+  animator = new Animator(layer);
   tokenUpdateCoordinator = new TokenUpdateCoordinator(
     triggering,
+    tokenCalculator,
+    animator,
   );
 
   patterner = new Patterner();
@@ -212,7 +232,7 @@ Hooks.on('updateToken', async (scene, token, delta) => {
   await tokenUpdateCoordinator.coordinateUpdate(
     token,
     canvas.tiles.placeables,
-    game.user.viewedScene,
+    scene,
   );
 });
 

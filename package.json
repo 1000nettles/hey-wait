@@ -11,6 +11,9 @@
   },
   "author": "1000nettles",
   "license": "MIT",
+  "dependencies": {
+    "pixi-ease": "^3.0.7"
+  },
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
