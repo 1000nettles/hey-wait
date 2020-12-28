@@ -54,42 +54,42 @@ export default class Animator {
     const anim1 = ease.add(
       child,
       { alpha: 100, x, y: y - (gridSize * 0.25) },
-      { duration: 50 },
+      { duration: 150 },
     );
 
     anim1.once('complete', () => {
       const anim2 = ease.add(
         child,
         { x, y: y - (gridSize * 1.25) },
-        { duration: 33 },
+        { duration: 100 },
       );
 
       anim2.once('complete', () => {
         const anim3 = ease.add(
           child,
           { x, y: y - (gridSize * 0.85) },
-          { duration: 33 },
+          { duration: 100 },
         );
 
         anim3.once('complete', () => {
           const anim4 = ease.add(
             child,
             { x, y: y - (gridSize * 0.95) },
-            { duration: 15 },
+            { duration: 45 },
           );
 
           anim4.once('complete', () => {
             const anim5 = ease.add(
               child,
               { x, y: y - (gridSize * 0.85) },
-              { duration: 15 },
+              { duration: 45 },
             );
 
             anim5.once('complete', () => {
               const anim6 = ease.add(
                 child,
                 { alpha: 0 },
-                { wait: 250, duration: 500 },
+                { duration: 2500 },
               );
 
               anim6.once('complete', () => {
