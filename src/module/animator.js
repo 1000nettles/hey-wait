@@ -1,5 +1,3 @@
-import { ease } from 'pixi-ease';
-
 /* global PIXI */
 
 /**
@@ -7,11 +5,16 @@ import { ease } from 'pixi-ease';
  * a "?" or "!" on top of the specified X and Y coordinates.
  */
 export default class Animator {
-  constructor(layer) {
+  constructor(layer, ease) {
     /**
-     * The associated Layer instance.
+     * The injected Layer instance dependency.
      */
     this.layer = layer;
+
+    /**
+     * The injected PIXI Ease dependency.
+     */
+    this.ease = ease;
   }
 
   /**
@@ -21,9 +24,10 @@ export default class Animator {
    */
   static get animationTypes() {
     return {
-      TYPE_EXCLAMATION: 1,
+      TYPE_NONE: 0,
+      TYPE_INFO: 1,
       TYPE_QUESTION: 2,
-      TYPE_INFO: 3,
+      TYPE_EXCLAMATION: 3,
     };
   }
 
@@ -40,6 +44,10 @@ export default class Animator {
    *   The size of a grid space.
    */
   animate(type, x, y, gridSize) {
+    if (type === Animator.animationTypes.TYPE_NONE) {
+      return;
+    }
+
     const sprite = this._getSprite(type, gridSize);
     sprite.alpha = 0;
 
@@ -51,42 +59,42 @@ export default class Animator {
 
     const child = this.layer.addChild(sprite);
 
-    const anim1 = ease.add(
+    const anim1 = this.ease.add(
       child,
       { alpha: 100, x, y: y - (gridSize * 0.25) },
       { duration: 150 },
     );
 
     anim1.once('complete', () => {
-      const anim2 = ease.add(
+      const anim2 = this.ease.add(
         child,
         { x, y: y - (gridSize * 1.25) },
         { duration: 100 },
       );
 
       anim2.once('complete', () => {
-        const anim3 = ease.add(
+        const anim3 = this.ease.add(
           child,
           { x, y: y - (gridSize * 0.85) },
           { duration: 100 },
         );
 
         anim3.once('complete', () => {
-          const anim4 = ease.add(
+          const anim4 = this.ease.add(
             child,
             { x, y: y - (gridSize * 0.95) },
             { duration: 45 },
           );
 
           anim4.once('complete', () => {
-            const anim5 = ease.add(
+            const anim5 = this.ease.add(
               child,
               { x, y: y - (gridSize * 0.85) },
               { duration: 45 },
             );
 
             anim5.once('complete', () => {
-              const anim6 = ease.add(
+              const anim6 = this.ease.add(
                 child,
                 { alpha: 0 },
                 { duration: 2500 },

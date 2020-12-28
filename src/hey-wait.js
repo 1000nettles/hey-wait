@@ -7,6 +7,7 @@
  */
 
 // Import JavaScript modules.
+import { ease } from 'pixi-ease';
 import registerSettings from './module/settings';
 import ControlsGenerator from './module/controlsGenerator';
 import Collision from './module/collision';
@@ -120,7 +121,7 @@ Hooks.on('canvasReady', async () => {
   );
 
   tokenCalculator = new TokenCalculator();
-  animator = new Animator(layer);
+  animator = new Animator(layer, ease);
 
   animationCoordinator = new AnimationCoordinator(tokenCalculator, animator);
 
@@ -183,22 +184,11 @@ Hooks.on('preCreateTile', (scene, data) => {
   data.flags['hey-wait'] = {
     enabled: true,
     triggered: false,
+    animType: Number(data.heyWaitAnimType),
   };
 
   // Hey, Wait! tiles should be hidden so players cannot see them.
   data.hidden = true;
-});
-
-Hooks.on('preUpdateTile', (scene, data, delta) => {
-  // Ensure that Hey, Wait! tiles cannot be rotated.
-  // Probably temporary, our logic for collision doesn't take into account
-  // rotations.
-  if (
-    data?.flags?.['hey-wait']?.enabled
-    && delta?.rotation !== undefined
-  ) {
-    delta.rotation = 0;
-  }
 });
 
 Hooks.on('createTile', async (scene, data) => {
@@ -212,6 +202,24 @@ Hooks.on('createTile', async (scene, data) => {
   // and pass it to be patterned.
   const createdTile = canvas.tiles.get(data._id);
   await patterner.addPatterningToTile(createdTile);
+});
+
+Hooks.on('preUpdateTile', (scene, data, delta) => {
+  if (!data?.flags?.['hey-wait']?.enabled) {
+    return;
+  }
+
+  // Ensure that Hey, Wait! tiles cannot be rotated.
+  // Probably temporary, our logic for collision doesn't take into account
+  // rotations.
+  if (delta?.rotation !== undefined) {
+    delta.rotation = 0;
+  }
+
+  // Record the selected animation type for the Hey, Wait! tile.
+  if (delta?.heyWaitAnimType !== undefined) {
+    data.flags['hey-wait'].animType = Number(delta?.heyWaitAnimType);
+  }
 });
 
 Hooks.on('updateTile', async (scene, data) => {
@@ -288,7 +296,13 @@ Hooks.on('renderTileConfig', (config) => {
     return;
   }
 
-  // Hide the file picker and notes for Hey, Wait! tiling...
+  const animType = config.object.data?.flags?.['hey-wait']?.animType
+    ?? Animator.animationTypes.TYPE_NONE;
+
+  console.log('animtype');
+  console.log(animType);
+
+  // Hide the file picker, rotation, and notes for Hey, Wait! tiling...
   const tileSpriteInputEl = jQuery(config.form).find('input[name="img"]');
   const tileSpriteGroupEl = tileSpriteInputEl.closest('.form-group');
   const rotationGroupEl = jQuery(config.form)
@@ -307,6 +321,40 @@ Hooks.on('renderTileConfig', (config) => {
     'Configure this Hey, Wait! tile. Hey, Wait! tiles that are <span style="color:darkred;font-weight:bold;">red</span> have not been triggered yet. Hey, Wait! tiles that are <span style="color:green;font-weight:bold;">green</span> have already been triggered by players.',
   );
 
+  const tileType = jQuery('<select></select>')
+    .attr('name', 'heyWaitAnimType');
+  const tileTypeKeys = Object.values(Animator.animationTypes);
+  const tileTypeValues = [
+    game.i18n.localize('HEYWAIT.TILECONFIG.typeNone'),
+    game.i18n.localize('HEYWAIT.TILECONFIG.typeInfo'),
+    game.i18n.localize('HEYWAIT.TILECONFIG.typeQuestion'),
+    game.i18n.localize('HEYWAIT.TILECONFIG.typeExclamation'),
+  ];
+
+  for (let i = 0; i < tileTypeKeys.length; i += 1) {
+    const option = jQuery('<option></option>');
+    jQuery(option).val(tileTypeKeys[i]);
+    jQuery(option).html(tileTypeValues[i]);
+    jQuery(tileType).append(option);
+  }
+
+  tileType.val(animType);
+
+  const tileTypeLabel = jQuery('<label></label>')
+    .attr('for', 'heyWaitAnimType')
+    .html(game.i18n.localize('HEYWAIT.TILECONFIG.typeText'));
+
+  const tileTypeWrapped = tileType
+    .wrap('<div class="form-group"></div>')
+    .parent();
+
+  tileTypeWrapped.prepend(tileTypeLabel);
+
+  jQuery(tileTypeWrapped).insertBefore(
+    jQuery(config.form).find(':submit'),
+  );
+
+  // Add the hidden element specifying that this is a Hey, Wait! Tile.
   const hidden = jQuery('<input>')
     .attr('type', 'hidden')
     .attr('name', 'isHeyWaitTile')
