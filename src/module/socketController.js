@@ -11,12 +11,14 @@ export default class SocketController {
    *   The current Socket instance.
    * @param {User} user
    *   The current User instance.
-   * @param {Canvas} canvas
-   *   The current Canvas instance.
    * @param {GameChanger} gameChanger
    *   The current GameChanger instance.
+   * @param {AnimationCoordinator} animationCoordinator
+   *   The current AnimationCoordinator instance.
+   * @param {EntityFinder} entityFinder
+   *   The current EntityFinder instance.
    */
-  constructor(socket, user, gameChanger) {
+  constructor(socket, user, gameChanger, animationCoordinator, entityFinder) {
     /**
      * The current WebSocket instance.
      *
@@ -37,6 +39,16 @@ export default class SocketController {
      * @type {GameChanger}
      */
     this.gameChanger = gameChanger;
+
+    /**
+     * The current AnimationCoordinator instance.
+     */
+    this.animationCoordinator = animationCoordinator;
+
+    /**
+     * The injected EntityFinder dependency.
+     */
+    this.entityFinder = entityFinder;
 
     /**
      * The name of our socket.
@@ -67,25 +79,23 @@ export default class SocketController {
   /**
    * Emit any Hey, Wait! events that occurred.
    *
-   * @param {number} x
-   *   X coordinate of where the canvas should pan to.
-   * @param {number} y
-   *   Y coordinate of where the canvas should pan to.
+   * @param {string} tokenId
+   *   The ID of the Token that has collided with the Tile.
    * @param {string} tileId
-   *   The ID of the tile that the token has collided with.
+   *   The ID of the Tile that the Token has collided with.
    * @param sceneId
    *   The scene ID where this is taking place.
    *
    * @return {Promise<void>}
    *   The promise for what's taking place.
    */
-  async emit(x, y, tileId, sceneId) {
+  async emit(tokenId, tileId, sceneId) {
     console.debug(`hey-wait | Emitting to ${this.socketName}`);
 
     this.socket.emit(
       this.socketName,
       {
-        x, y, tileId, sceneId,
+        tokenId, tileId, sceneId,
       },
     );
   }
@@ -105,11 +115,16 @@ export default class SocketController {
       console.debug(`hey-wait | Emission received on ${this.socketName}`);
 
       try {
+        const scene = this.entityFinder.findScene(data.sceneId);
+        const token = this.entityFinder.findToken(data.tokenId, data.sceneId);
+
         await this.gameChanger.execute(
           data.tileId,
-          { x: data.x, y: data.y },
+          { x: token.x, y: token.y },
           data.sceneId,
         );
+
+        await this.animationCoordinator.handleTokenAnimationAfterUpdate(scene, token);
       } catch (e) {
         console.error(`hey-wait | ${e.name}: ${e.message}`);
       }

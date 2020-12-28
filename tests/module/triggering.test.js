@@ -87,6 +87,7 @@ it('can determine a tile has been triggered', async () => {
   };
 
   const token = {
+    _id: 'a_token_id',
     x: 3,
     y: 4,
   };
@@ -106,8 +107,7 @@ it('can determine a tile has been triggered', async () => {
   );
 
   expect(mockSocketController.emit).toHaveBeenCalledWith(
-    3,
-    4,
+    'a_token_id',
     'an_id',
     'a_viewed_scene',
   );

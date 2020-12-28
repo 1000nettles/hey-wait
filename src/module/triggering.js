@@ -109,8 +109,7 @@ export default class Triggering {
 
     // Emit the triggering to other users to their games can adjust accordingly.
     await this.socketController.emit(
-      x,
-      y,
+      token._id,
       tile.data._id,
       viewedScene,
     );

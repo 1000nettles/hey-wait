@@ -20,6 +20,7 @@ import Patterner from './module/patterner';
 import Animator from './module/animator';
 import TokenCalculator from './module/tokenCalculator';
 import AnimationCoordinator from './module/animationCoordinator';
+import EntityFinder from './module/entityFinder';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -89,6 +90,11 @@ let tokenCalculator;
 let animationCoordinator;
 
 /**
+ * Our EntityFinder instance.
+ */
+let entityFinder;
+
+/**
  * Our Animator instance.
  */
 let animator;
@@ -107,17 +113,7 @@ Hooks.once('init', async () => {
 Hooks.on('canvasReady', async () => {
   collision = new Collision(canvas.grid.size);
   gameChanger = new GameChanger(game, canvas);
-
-  // Ensure that we only have a single socket open for our module so we don't
-  // clutter up open sockets when changing scenes (or, more specifically,
-  // rendering new canvases.)
-  if (socketController instanceof SocketController) {
-    await socketController.deactivate();
-  }
-  socketController = new SocketController(game.socket, game.user, gameChanger);
-
-  triggering = new Triggering(gameChanger, socketController, collision);
-  tileAuditor = new TileAuditor();
+  entityFinder = new EntityFinder(game);
 
   const layer = canvas.layers.find(
     (targetLayer) => targetLayer instanceof TilesLayer,
@@ -127,6 +123,23 @@ Hooks.on('canvasReady', async () => {
   animator = new Animator(layer);
 
   animationCoordinator = new AnimationCoordinator(tokenCalculator, animator);
+
+  // Ensure that we only have a single socket open for our module so we don't
+  // clutter up open sockets when changing scenes (or, more specifically,
+  // rendering new canvases.)
+  if (socketController instanceof SocketController) {
+    await socketController.deactivate();
+  }
+  socketController = new SocketController(
+    game.socket,
+    game.user,
+    gameChanger,
+    animationCoordinator,
+    entityFinder,
+  );
+
+  triggering = new Triggering(gameChanger, socketController, collision);
+  tileAuditor = new TileAuditor();
 
   tokenUpdateCoordinator = new TokenUpdateCoordinator(
     triggering,
