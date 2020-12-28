@@ -19,6 +19,7 @@ import GameChanger from './module/gameChanger';
 import Patterner from './module/patterner';
 import Animator from './module/animator';
 import TokenCalculator from './module/tokenCalculator';
+import AnimationCoordinator from './module/animationCoordinator';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -77,7 +78,15 @@ let tokenUpdateCoordinator;
  */
 let patterner;
 
+/**
+ * Our TokenCalculator instance.
+ */
 let tokenCalculator;
+
+/**
+ * Our AnimationCoordinator instance.
+ */
+let animationCoordinator;
 
 /**
  * Our Animator instance.
@@ -116,10 +125,13 @@ Hooks.on('canvasReady', async () => {
 
   tokenCalculator = new TokenCalculator();
   animator = new Animator(layer);
+
+  animationCoordinator = new AnimationCoordinator(tokenCalculator, animator);
+
   tokenUpdateCoordinator = new TokenUpdateCoordinator(
     triggering,
     tokenCalculator,
-    animator,
+    animationCoordinator,
   );
 
   patterner = new Patterner();

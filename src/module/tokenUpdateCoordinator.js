@@ -1,10 +1,5 @@
 /* eslint-disable no-console */
-/* eslint-disable no-loop-func */
-/* eslint-disable no-await-in-loop */
-/* global CanvasAnimation */
 /* global performance */
-
-import Animator from './animator';
 
 /**
  * Coordinate any Token updates from the Foundry Hook system.
@@ -17,13 +12,13 @@ export default class TokenUpdateCoordinator {
    *   The injected Triggering dependency.
    * @param {TokenCalculator} tokenCalculator
    *   The injected TokenCalculator dependency.
-   * @param {Animator} animator
-   *   The injected Animator dependency.
+   * @param {AnimationCoordinator} animationCoordinator
+   *   The injected AnimationCoordinator dependency.
    */
-  constructor(triggering, tokenCalculator, animator) {
+  constructor(triggering, tokenCalculator, animationCoordinator) {
     this.triggering = triggering;
     this.tokenCalculator = tokenCalculator;
-    this.animator = animator;
+    this.animationCoordinator = animationCoordinator;
 
     /**
      * Keep track of the Token's initial position between updates.
@@ -93,7 +88,9 @@ export default class TokenUpdateCoordinator {
     console.debug(`hey-wait | \`coordinateUpdate\` took ${t1 - t0}ms.`);
 
     if (wasTriggered) {
-      await this._handleAnimation(scene, token);
+      await this
+        .animationCoordinator
+        .handleTokenAnimationAfterUpdate(scene, token);
     }
 
     this._cleanQueuedTokenInitPos(token._id);
@@ -110,65 +107,5 @@ export default class TokenUpdateCoordinator {
    */
   _cleanQueuedTokenInitPos(tokenId) {
     this.tokenInitPos.delete(tokenId);
-  }
-
-  /**
-   * Handle the reaction animation on the specified Token.
-   *
-   * @param {Scene} scene
-   *   The current Scene.
-   * @param {Token} token
-   *   The associated Token to animate the reaction on.
-   *
-   * @return {Promise<void>}
-   *
-   * @private
-   */
-  async _handleAnimation(scene, token) {
-    const coords = this.tokenCalculator.calculateCoordinates(
-      scene,
-      token,
-    );
-
-    // Create a "timeout" function which allows us to sleep for specific
-    // amounts of time.
-    // See https://stackoverflow.com/a/33292942/823549.
-    const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    // Check for the deletion of the animation key in the current animations
-    // to be sure that the animation has been successfully completed.
-    // This is hacky but unfortunately I'm unsure of another way to listen
-    // for animations being completed.
-    // This should allow for a buffer of 20 seconds to allow the animation to
-    // finish which theoretically should be more than enough time.
-    for (let i = 1; i <= 200; i += 1) {
-      await timeout(100);
-      if (!CanvasAnimation.animations?.[this._getAnimationKeyFromToken(token)]) {
-        await this.animator.animate(
-          Animator.animationTypes.TYPE_QUESTION,
-          coords.x,
-          coords.y,
-          scene.data.grid,
-        );
-
-        break;
-      }
-    }
-  }
-
-  /**
-   * Get the expected animation array key from the Token object.
-   *
-   * This is used to find the animation pertaining to the Token.
-   *
-   * @param {Token} token
-   *   The specified Token to find the animation for.
-   *
-   * @return {string}
-   *
-   * @private
-   */
-  _getAnimationKeyFromToken(token) {
-    return `Token.${token._id}.animateMovement`;
   }
 }
