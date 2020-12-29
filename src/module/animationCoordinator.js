@@ -4,6 +4,7 @@
 /* global CanvasAnimation */
 
 import Animator from './animator';
+import Constants from './constants';
 
 /**
  * Coordinate processing and running any animations within the module.
@@ -16,10 +17,14 @@ export default class AnimationCoordinator {
    *   The injected TokenCalculator dependency.
    * @param {Animator} animator
    *   The injected Animator dependency.
+   * @param {ClientSettings} settings
+   *   The injected ClientSettings dependency. Contains all current game
+   *   settings.
    */
-  constructor(tokenCalculator, animator) {
+  constructor(tokenCalculator, animator, settings) {
     this.tokenCalculator = tokenCalculator;
     this.animator = animator;
+    this.settings = settings;
   }
 
   /**
@@ -59,20 +64,18 @@ export default class AnimationCoordinator {
     for (let i = 1; i <= 200; i += 1) {
       await timeout(100);
       if (!CanvasAnimation.animations?.[this._getAnimationKeyFromToken(token)]) {
-        await this.animator.animate(
+        const animPromise = this.animator.animate(
           animType,
           coords.x,
           coords.y,
           scene.data.grid,
         );
 
-        if (animType !== Animator.animationTypes.TYPE_NONE) {
-          const path = `modules/hey-wait/sounds/reaction${animType}.mp3`;
-          AudioHelper.play({
-            src: path,
-            autoplay: true,
-          }, false);
-        }
+        const sfxPromise = this._handleSfx(animType);
+
+        // Ensure the full animation and sound effect have been played before
+        // exiting.
+        await Promise.all([animPromise, sfxPromise]);
 
         break;
       }
@@ -93,5 +96,53 @@ export default class AnimationCoordinator {
    */
   _getAnimationKeyFromToken(token) {
     return `Token.${token._id}.animateMovement`;
+  }
+
+  /**
+   * Handle the playing of any sound effects, if applicable to the animation.
+   *
+   * @param {Animator.animationTypes} animType
+   *   One of the animation types, which corresponds to the SFX ID number.
+   *
+   * @return {Promise<unknown>}
+   *   Return the promise to be resolved once the sound is done playing.
+   *
+   * @private
+   */
+  _handleSfx(animType) {
+    const promise = new Promise(() => {});
+
+    if (
+      animType === Animator.animationTypes.TYPE_NONE
+      || this._sfxDisabled()
+    ) {
+      return Promise.resolve(promise);
+    }
+
+    const path = `modules/hey-wait/sounds/reaction${animType}.mp3`;
+    const sound = AudioHelper.play({
+      src: path,
+      autoplay: true,
+    }, false);
+
+    // Wait until the sound is finished before resolving the promise.
+    sound.on('end', () => Promise.resolve(promise));
+
+    return promise;
+  }
+
+  /**
+   * Get if the sound effects for animations are disabled.
+   *
+   * @return {boolean}
+   *   If the sound effects for animations are disabled.
+   *
+   * @private
+   */
+  _sfxDisabled() {
+    return Boolean(this.settings.get(
+      Constants.MODULE_NAME,
+      'disable-sfx',
+    ));
   }
 }

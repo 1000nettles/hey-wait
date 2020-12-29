@@ -123,7 +123,11 @@ Hooks.on('canvasReady', async () => {
   tokenCalculator = new TokenCalculator();
   animator = new Animator(layer, ease);
 
-  animationCoordinator = new AnimationCoordinator(tokenCalculator, animator);
+  animationCoordinator = new AnimationCoordinator(
+    tokenCalculator,
+    animator,
+    game.settings,
+  );
 
   // Ensure that we only have a single socket open for our module so we don't
   // clutter up open sockets when changing scenes (or, more specifically,

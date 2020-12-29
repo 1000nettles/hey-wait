@@ -1,6 +1,8 @@
 {
   "HEYWAIT.SETTINGS.restrictGmName": "Restrict GM from Triggering Tiles",
-  "HEYWAIT.SETTINGS.restrictGmHint": "Triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM",
+  "HEYWAIT.SETTINGS.restrictGmHint": "Triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM.",
+  "HEYWAIT.SETTINGS.disableSfxName": "Disable Tile Triggering Sound Effects",
+  "HEYWAIT.SETTINGS.disableSfxHint": "Disables playing sound effects when anyone triggers Hey, Wait! tiles.",
   "HEYWAIT.CONTROLS.TOOLS.heyWaitTile": "Place \"Hey, Wait!\" Tile",
   "HEYWAIT.TEMPLATE.isNotTriggered": "Toggle \"Hey, Wait!\" Triggered State",
   "HEYWAIT.TILECONFIG.typeText": "Trigger Animation Type",
