@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 /* global performance */
 
+import Animator from './animator';
+
 /**
  * Coordinate any Token updates from the Foundry Hook system.
  */
@@ -77,7 +79,7 @@ export default class TokenUpdateCoordinator {
       return;
     }
 
-    const wasTriggered = await this.triggering.handleTileTriggering(
+    const triggeredTile = await this.triggering.handleTileTriggering(
       tiles,
       token,
       initPos,
@@ -87,10 +89,13 @@ export default class TokenUpdateCoordinator {
     const t1 = performance.now();
     console.debug(`hey-wait | \`coordinateUpdate\` took ${t1 - t0}ms.`);
 
-    if (wasTriggered) {
+    if (triggeredTile !== null) {
+      const animType = triggeredTile.data?.flags?.['hey-wait']?.animType
+        ?? Animator.animationTypes.TYPE_NONE;
+
       await this
         .animationCoordinator
-        .handleTokenAnimationAfterUpdate(scene, token);
+        .handleTokenAnimationAfterUpdate(scene, token, animType);
     }
 
     this._cleanQueuedTokenInitPos(token._id);

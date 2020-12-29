@@ -35,7 +35,7 @@ export default class Triggering {
    * @return {Promise<boolean>}
    */
   async handleTileTriggering(tiles, token, initPos, viewedScene) {
-    let hasBeenTriggered = false;
+    let triggeredTile;
 
     for (const tile of tiles) {
       if (!this._isTileTriggered(tile, token, initPos)) {
@@ -45,11 +45,11 @@ export default class Triggering {
 
       // eslint-disable-next-line no-await-in-loop
       await this._executeTrigger(token, tile, viewedScene);
-      hasBeenTriggered = true;
+      triggeredTile = tile;
       break;
     }
 
-    return hasBeenTriggered;
+    return triggeredTile;
   }
 
   /**

@@ -8,7 +8,8 @@ let mockGameChanger;
 let mockAnimationCoordinator;
 let mockEntityFinder;
 let socketController;
-let mockToken;
+let mockTokenData;
+let mockTileData;
 
 beforeEach(() => {
   mockSocket = {};
@@ -19,14 +20,24 @@ beforeEach(() => {
 
   mockAnimationCoordinator.handleTokenAnimationAfterUpdate = jest.fn();
 
-  mockToken = {
-    _id: 'an_id',
+  mockTokenData = {
+    _id: 'a_token_id',
     x: 1,
     y: 2,
   };
 
+  mockTileData = {
+    id: 'a_tile_id',
+    flags: {
+      'hey-wait': {
+        animType: 2,
+      },
+    },
+  };
+
   mockEntityFinder.findScene = jest.fn().mockReturnValue('a_scene');
-  mockEntityFinder.findToken = jest.fn().mockReturnValue(mockToken);
+  mockEntityFinder.findTokenData = jest.fn().mockReturnValue(mockTokenData);
+  mockEntityFinder.findTileData = jest.fn().mockReturnValue(mockTileData);
 
   socketController = new SocketController(
     mockSocket,
@@ -65,7 +76,8 @@ it('should initialize the socket listener and listen', async () => {
   );
   expect(mockAnimationCoordinator.handleTokenAnimationAfterUpdate).toHaveBeenCalledWith(
     'a_scene',
-    mockToken,
+    mockTokenData,
+    2,
   );
 });
 

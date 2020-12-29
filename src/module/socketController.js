@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 
+import Animator from './animator';
+
 /**
  * A controller for handling socket related operations for our module.
  */
@@ -116,7 +118,10 @@ export default class SocketController {
 
       try {
         const scene = this.entityFinder.findScene(data.sceneId);
-        const token = this.entityFinder.findToken(data.tokenId, data.sceneId);
+        const token = this.entityFinder.findTokenData(
+          data.tokenId,
+          data.sceneId,
+        );
 
         await this.gameChanger.execute(
           data.tileId,
@@ -124,7 +129,15 @@ export default class SocketController {
           data.sceneId,
         );
 
-        await this.animationCoordinator.handleTokenAnimationAfterUpdate(scene, token);
+        const tileData = this.entityFinder.findTileData(data.tileId, data.sceneId);
+        const animType = tileData?.flags?.['hey-wait']?.animType
+          ?? Animator.animationTypes.TYPE_NONE;
+
+        await this.animationCoordinator.handleTokenAnimationAfterUpdate(
+          scene,
+          token,
+          animType,
+        );
       } catch (e) {
         console.error(`hey-wait | ${e.name}: ${e.message}`);
       }

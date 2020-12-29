@@ -1,5 +1,6 @@
 /**
- * A class to find entities in the Game based on sparse information.
+ * A class to find entities and their data in the Game based on sparse
+ * information.
  */
 export default class EntityFinder {
   constructor(game) {
@@ -25,25 +26,48 @@ export default class EntityFinder {
   }
 
   /**
-   * Find the Token by Token ID.
+   * Find the Token data by Token ID.
    *
    * @param {string} tokenId
    *   The ID of the Token.
    * @param {string} sceneId
    *   The ID of the Scene.
    *
-   * @return {Token}
+   * @return {Object}
    */
-  findToken(tokenId, sceneId) {
+  findTokenData(tokenId, sceneId) {
     const scene = this.findScene(sceneId);
     const { tokens } = scene.data;
 
-    const targetToken = tokens.find((token) => token._id === tokenId);
+    const tokenData = tokens.find((token) => token._id === tokenId);
 
-    if (!targetToken) {
+    if (!tokenData) {
       throw new Error(`Could not find Token with ID ${tokenId} in Scene ${scene.data._id}`);
     }
 
-    return targetToken;
+    return tokenData;
+  }
+
+  /**
+   * Find the Tile data by Tile ID.
+   *
+   * @param {string} tileId
+   *   The ID of the Tile.
+   * @param {string} sceneId
+   *   The ID of the Scene.
+   *
+   * @return {Object}
+   */
+  findTileData(tileId, sceneId) {
+    const scene = this.findScene(sceneId);
+    const { tiles } = scene.data;
+
+    const tileData = tiles.find((tile) => tile._id === tileId);
+
+    if (!tileData) {
+      throw new Error(`Could not find Tile data with ID ${tileId} in Scene ${scene.data._id}`);
+    }
+
+    return tileData;
   }
 }

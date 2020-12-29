@@ -1,5 +1,3 @@
-import Animator from './animator';
-
 /* eslint-disable no-loop-func */
 /* eslint-disable no-await-in-loop */
 /* global CanvasAnimation */
@@ -23,12 +21,14 @@ export default class AnimationCoordinator {
    *   The current Scene.
    * @param {Token} token
    *   The associated Token to animate the reaction on.
+   * @param {Animator.animationTypes} animType
+   *   The associated Token to animate the reaction on.
    *
    * @return {Promise<void>}
    *
    * @private
    */
-  async handleTokenAnimationAfterUpdate(scene, token) {
+  async handleTokenAnimationAfterUpdate(scene, token, animType) {
     const coords = this.tokenCalculator.calculateCoordinates(
       scene,
       token,
@@ -49,7 +49,7 @@ export default class AnimationCoordinator {
       await timeout(100);
       if (!CanvasAnimation.animations?.[this._getAnimationKeyFromToken(token)]) {
         await this.animator.animate(
-          Animator.animationTypes.TYPE_QUESTION,
+          animType,
           coords.x,
           coords.y,
           scene.data.grid,
