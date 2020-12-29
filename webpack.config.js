@@ -20,6 +20,7 @@ module.exports = {
         { from: './src/lang/*', to: './' },
         { from: './src/img/*', to: './' },
         { from: './src/templates/*', to: './' },
+        { from: './sounds/*', to: './' },
       ],
     }),
   ],

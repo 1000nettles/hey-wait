@@ -1,11 +1,22 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable no-await-in-loop */
+/* global AudioHelper */
 /* global CanvasAnimation */
+
+import Animator from './animator';
 
 /**
  * Coordinate processing and running any animations within the module.
  */
 export default class AnimationCoordinator {
+  /**
+   * AnimationCoordinator constructor.
+   *
+   * @param {TokenCalculator} tokenCalculator
+   *   The injected TokenCalculator dependency.
+   * @param {Animator} animator
+   *   The injected Animator dependency.
+   */
   constructor(tokenCalculator, animator) {
     this.tokenCalculator = tokenCalculator;
     this.animator = animator;
@@ -54,6 +65,14 @@ export default class AnimationCoordinator {
           coords.y,
           scene.data.grid,
         );
+
+        if (animType !== Animator.animationTypes.TYPE_NONE) {
+          const path = `modules/hey-wait/sounds/reaction${animType}.mp3`;
+          AudioHelper.play({
+            src: path,
+            autoplay: true,
+          }, false);
+        }
 
         break;
       }
