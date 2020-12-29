@@ -29,20 +29,21 @@ You can also toggle the triggered state of the Hey, Wait! tile. Right-click on t
 
 Note that the visibility button has disappeared. Hey, Wait! tiles are always invisible to players.
 
+If you would like to adjust the volume of the sound effects, the "Interface" volume slider can be used. Or, you can disable the sound effects completely.
+
 ## Settings :ballot_box_with_check:
 
-* **Restrict GM from Triggering Tiles:** If enabled, triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM
+* **Restrict GM from Triggering Tiles:** If checked, triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM
+* **Disable Tile Triggering Sound Effects:** If checked, the module will disable playing sound effects when anyone triggers Hey, Wait! tiles. This will disable it for all players
 
 ## Known Limitations :x:
 
 * No rotation allowed on Hey, Wait! tiles
-* Accessibility issues - red and green aren't the best colours to use here. Eventually we'd like to move to the Hey, Wait! tiles having some sort of pattern in them denoting the tile's triggered status
 
 ## Future Planned Features :crystal_ball:
 
-* Animation on token when triggering tiles
-* Sound effects when triggering tiles
-* Accessibility improvements
+* Ability to choose your define your own sound effects
+* Ability to customize the symbols and their font / colour in the animations  
 * ...please suggest some!
 
 ## Acknowledgements :wave:
