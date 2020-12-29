@@ -317,7 +317,9 @@ Hooks.on('renderTileConfig', (config) => {
   rotationGroupEl.hide();
   tileSpriteNotesEl.hide();
 
-  tileSpriteInputEl.val(Constants.TILE_STOP_PATH);
+  if (!tileSpriteInputEl.val()) {
+    tileSpriteInputEl.val(Constants.TILE_STOP_PATH);
+  }
 
   const newNotes = jQuery('<p>')
     .attr('class', 'notes');
