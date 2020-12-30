@@ -2,7 +2,7 @@
   "name": "hey-wait",
   "title": "Hey, Wait!",
   "description": "\"Hey, Wait!\" allows a GM to place \"event triggers\" as tiles on a scene.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "1000nettles",
   "languages": [
     {
@@ -19,7 +19,7 @@
   "compatibleCoreVersion": "0.7.9",
   "url": "https://github.com/1000nettles/hey-wait",
   "manifest": "https://github.com/1000nettles/hey-wait/releases/latest/download/module.json",
-  "download": "https://github.com/1000nettles/hey-wait/releases/download/v0.2.0/hey-wait-v0.2.0.zip",
+  "download": "https://github.com/1000nettles/hey-wait/releases/download/v0.3.0/hey-wait-v0.3.0.zip",
   "license": "MIT",
   "readme": "https://raw.githubusercontent.com/1000nettles/hey-wait/main/README.md"
 }
