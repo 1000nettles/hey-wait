@@ -13,7 +13,7 @@
 
 On the left, we see the GM's screen where they have placed a Hey, Wait! tile (shown in red.) On the right, we see the player's screen, where they are unable to see the tile. After a collision into the Hey, Wait! tile, the game pauses and pans over to the player who triggered the tile. When a tile is triggered, it turns green. Hey, Wait! also picks up if a player has dragged their token across the scene.
 
-![Hey, Wait! preview](img/preview1.gif)
+![Hey, Wait! preview](img/preview1_v030.gif)
 
 Thanks to [Neutral Party](https://www.patreon.com/neutralparty) for the sample background map above.
 
@@ -21,11 +21,11 @@ Thanks to [Neutral Party](https://www.patreon.com/neutralparty) for the sample b
 
 Start by installing the module, and enabling it for your world. If you click on the Tile button in the toolbar, you'll see a new button added denoted by a :hand:. This is the same as the Tile creation tool, except it's used to create Hey, Wait! tiles. These tiles are hidden "triggers" which, when a player steps on them with the token they're moving, will trigger a game pause and pans all players' views over to them. You are still able to use the normal tile functionality in FoundryVTT.
 
-![Hey, Wait! in the toolbar](img/preview2.jpg)
+![Hey, Wait! in the toolbar](img/preview2_v030.jpg)
 
 You can also toggle the triggered state of the Hey, Wait! tile. Right-click on the tile and toggle it like so:
 
-![Hey, Wait! tile toggling](img/preview3.gif)
+![Hey, Wait! tile toggling](img/preview3_v030.gif)
 
 Note that the visibility button has disappeared. Hey, Wait! tiles are always invisible to players.
 
