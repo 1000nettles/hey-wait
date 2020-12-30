@@ -3,8 +3,17 @@
  * information.
  */
 export default class EntityFinder {
-  constructor(game) {
+  /**
+   * EntityFinder constructor.
+   *
+   * @param {Game} game
+   *   The injected Game dependency.
+   * @param {Canvas} canvas
+   *   The injected Canvas dependency.
+   */
+  constructor(game, canvas) {
     this.game = game;
+    this.canvas = canvas;
   }
 
   /**
@@ -49,25 +58,22 @@ export default class EntityFinder {
   }
 
   /**
-   * Find the Tile data by Tile ID.
+   * Find the Tile by Tile ID.
    *
    * @param {string} tileId
    *   The ID of the Tile.
-   * @param {string} sceneId
-   *   The ID of the Scene.
    *
-   * @return {Object}
+   * @return {Tile}
    */
-  findTileData(tileId, sceneId) {
-    const scene = this.findScene(sceneId);
-    const { tiles } = scene.data;
+  findTile(tileId) {
+    const tile = this.canvas.tiles.placeables.find(
+      (placeableTile) => placeableTile.data._id === tileId,
+    );
 
-    const tileData = tiles.find((tile) => tile._id === tileId);
-
-    if (!tileData) {
-      throw new Error(`Could not find Tile data with ID ${tileId} in Scene ${scene.data._id}`);
+    if (!tile) {
+      throw new Error(`Could not find Tile data with ID ${tileId}`);
     }
 
-    return tileData;
+    return tile;
   }
 }

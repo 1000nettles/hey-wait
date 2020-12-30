@@ -1,7 +1,5 @@
 /* eslint-disable no-console */
 
-import Animator from './animator';
-
 /**
  * A controller for handling socket related operations for our module.
  */
@@ -15,12 +13,12 @@ export default class SocketController {
    *   The current User instance.
    * @param {GameChanger} gameChanger
    *   The current GameChanger instance.
-   * @param {AnimationCoordinator} animationCoordinator
-   *   The current AnimationCoordinator instance.
+   * @param {ReactionCoordinator} reactionCoordinator
+   *   The current ReactionCoordinator instance.
    * @param {EntityFinder} entityFinder
    *   The current EntityFinder instance.
    */
-  constructor(socket, user, gameChanger, animationCoordinator, entityFinder) {
+  constructor(socket, user, gameChanger, reactionCoordinator, entityFinder) {
     /**
      * The current WebSocket instance.
      *
@@ -43,9 +41,9 @@ export default class SocketController {
     this.gameChanger = gameChanger;
 
     /**
-     * The current AnimationCoordinator instance.
+     * The current ReactionCoordinator instance.
      */
-    this.animationCoordinator = animationCoordinator;
+    this.reactionCoordinator = reactionCoordinator;
 
     /**
      * The injected EntityFinder dependency.
@@ -85,19 +83,23 @@ export default class SocketController {
    *   The ID of the Token that has collided with the Tile.
    * @param {string} tileId
    *   The ID of the Tile that the Token has collided with.
-   * @param sceneId
+   * @param {string} sceneId
    *   The scene ID where this is taking place.
+   * @param {x,y} pos
+   *   The X and Y position where the event takes place.
+   * @param {number} animType
+   *   The animation type to execute on the Token.
    *
    * @return {Promise<void>}
    *   The promise for what's taking place.
    */
-  async emit(tokenId, tileId, sceneId) {
+  async emit(tokenId, tileId, sceneId, pos, animType) {
     console.debug(`hey-wait | Emitting to ${this.socketName}`);
 
     this.socket.emit(
       this.socketName,
       {
-        tokenId, tileId, sceneId,
+        tokenId, tileId, sceneId, pos, animType,
       },
     );
   }
@@ -118,25 +120,30 @@ export default class SocketController {
 
       try {
         const scene = this.entityFinder.findScene(data.sceneId);
+
+        // 1. Change the game by potentially modifying the tile and pausing the
+        // game.
+        await this.gameChanger.execute(
+          data.tileId,
+          { x: data.pos.x, y: data.pos.y },
+          data.sceneId,
+        );
+
         const token = this.entityFinder.findTokenData(
           data.tokenId,
           data.sceneId,
         );
 
-        await this.gameChanger.execute(
-          data.tileId,
+        // 2. Pan to the location where the event and reaction occurred.
+        await this.gameChanger.pan(
           { x: token.x, y: token.y },
-          data.sceneId,
         );
 
-        const tileData = this.entityFinder.findTileData(data.tileId, data.sceneId);
-        const animType = tileData?.flags?.['hey-wait']?.animType
-          ?? Animator.animationTypes.TYPE_NONE;
-
-        await this.animationCoordinator.handleTokenAnimationAfterUpdate(
+        // 3. Animate the reaction and add SFX to it.
+        await this.reactionCoordinator.handleTokenReaction(
           scene,
           token,
-          animType,
+          data.animType,
         );
       } catch (e) {
         console.error(`hey-wait | ${e.name}: ${e.message}`);

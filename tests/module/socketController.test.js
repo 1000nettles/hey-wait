@@ -1,11 +1,12 @@
 import SocketController from 'module/socketController';
+import Animator from '../../src/module/animator';
 
 /* eslint-disable no-console */
 
 let mockSocket;
 let mockUser;
 let mockGameChanger;
-let mockAnimationCoordinator;
+let mockReactionCoordinator;
 let mockEntityFinder;
 let socketController;
 let mockTokenData;
@@ -15,10 +16,12 @@ beforeEach(() => {
   mockSocket = {};
   mockUser = {};
   mockGameChanger = {};
-  mockAnimationCoordinator = {};
+  mockReactionCoordinator = {};
   mockEntityFinder = {};
 
-  mockAnimationCoordinator.handleTokenAnimationAfterUpdate = jest.fn();
+  mockGameChanger.pan = jest.fn();
+
+  mockReactionCoordinator.handleTokenReaction = jest.fn();
 
   mockTokenData = {
     _id: 'a_token_id',
@@ -43,7 +46,7 @@ beforeEach(() => {
     mockSocket,
     mockUser,
     mockGameChanger,
-    mockAnimationCoordinator,
+    mockReactionCoordinator,
     mockEntityFinder,
   );
 });
@@ -57,6 +60,8 @@ it('should initialize the socket listener and listen', async () => {
       tokenId: 'a_token_id',
       tileId: 'a_tile_id',
       sceneId: 'a_scene_id',
+      pos: { x: 1, y: 2 },
+      animType: Animator.animationTypes.TYPE_QUESTION,
     };
 
     // This is the callback function for `socket.on`. Let's call it to
@@ -74,10 +79,13 @@ it('should initialize the socket listener and listen', async () => {
     { x: 1, y: 2 },
     'a_scene_id',
   );
-  expect(mockAnimationCoordinator.handleTokenAnimationAfterUpdate).toHaveBeenCalledWith(
+  expect(mockReactionCoordinator.handleTokenReaction).toHaveBeenCalledWith(
     'a_scene',
     mockTokenData,
-    2,
+    Animator.animationTypes.TYPE_QUESTION,
+  );
+  expect(mockGameChanger.pan).toHaveBeenCalledWith(
+    { x: 1, y: 2 },
   );
 });
 
@@ -87,6 +95,8 @@ it('should initialize the socket listener and throw and error when executing on 
       tokenId: 'a_token_id',
       tileId: 'a_tile_id',
       sceneId: 'a_scene_id',
+      pos: { x: 1, y: 2 },
+      animType: Animator.animationTypes.TYPE_QUESTION,
     };
 
     // This is the callback function for `socket.on`. Let's call it to

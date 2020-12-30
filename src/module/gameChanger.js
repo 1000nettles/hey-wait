@@ -34,8 +34,25 @@ export default class GameChanger {
       this._pause();
       this._handleTileChange(tileId);
     }
+  }
 
-    this._animate(location);
+  /**
+     * Animate the canvas moving over to the desired location.
+     *
+     * @param {x,y} location
+     *   A location designated by X and Y coords.
+     *
+     * @return {Promise}
+     */
+  async pan(location) {
+    const { x, y } = location;
+
+    return this.canvas.animatePan({
+      x,
+      y,
+      scale: Math.max(1, this.canvas.stage.scale.x),
+      duration: Constants.CANVAS_PAN_DURATION,
+    });
   }
 
   /**
@@ -89,24 +106,5 @@ export default class GameChanger {
    */
   _pause() {
     this.game.togglePause(true, true);
-  }
-
-  /**
-   * Animate the canvas moving over to the desired location.
-   *
-   * @param {x,y} location
-   *   A location designated by X and Y coords.
-   *
-   * @private
-   */
-  _animate(location) {
-    const { x, y } = location;
-
-    this.canvas.animatePan({
-      x,
-      y,
-      scale: Math.max(1, this.canvas.stage.scale.x),
-      duration: Constants.CANVAS_PAN_DURATION,
-    });
   }
 }

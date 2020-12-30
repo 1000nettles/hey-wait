@@ -20,8 +20,9 @@ import GameChanger from './module/gameChanger';
 import Patterner from './module/patterner';
 import Animator from './module/animator';
 import TokenCalculator from './module/tokenCalculator';
-import AnimationCoordinator from './module/animationCoordinator';
+import ReactionCoordinator from './module/reactionCoordinator';
 import EntityFinder from './module/entityFinder';
+import TokenAnimationWatcher from './module/tokenAnimationWatcher';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -86,9 +87,9 @@ let patterner;
 let tokenCalculator;
 
 /**
- * Our AnimationCoordinator instance.
+ * Our ReactionCoordinator instance.
  */
-let animationCoordinator;
+let reactionCoordinator;
 
 /**
  * Our EntityFinder instance.
@@ -114,7 +115,7 @@ Hooks.once('init', async () => {
 Hooks.on('canvasReady', async () => {
   collision = new Collision(canvas.grid.size);
   gameChanger = new GameChanger(game, canvas);
-  entityFinder = new EntityFinder(game);
+  entityFinder = new EntityFinder(game, canvas);
 
   const layer = canvas.layers.find(
     (targetLayer) => targetLayer instanceof TilesLayer,
@@ -123,7 +124,7 @@ Hooks.on('canvasReady', async () => {
   tokenCalculator = new TokenCalculator();
   animator = new Animator(layer, ease);
 
-  animationCoordinator = new AnimationCoordinator(
+  reactionCoordinator = new ReactionCoordinator(
     tokenCalculator,
     animator,
     game.settings,
@@ -139,17 +140,22 @@ Hooks.on('canvasReady', async () => {
     game.socket,
     game.user,
     gameChanger,
-    animationCoordinator,
+    reactionCoordinator,
     entityFinder,
   );
 
-  triggering = new Triggering(gameChanger, socketController, collision);
+  triggering = new Triggering(
+    gameChanger,
+    new TokenAnimationWatcher(),
+    socketController,
+    collision,
+  );
   tileAuditor = new TileAuditor();
 
   tokenUpdateCoordinator = new TokenUpdateCoordinator(
     triggering,
     tokenCalculator,
-    animationCoordinator,
+    reactionCoordinator,
   );
 
   patterner = new Patterner();
@@ -208,7 +214,7 @@ Hooks.on('createTile', async (scene, data) => {
   await patterner.addPatterningToTile(createdTile);
 });
 
-Hooks.on('preUpdateTile', (scene, data, delta) => {
+Hooks.on('preUpdateTile', (scene, data, delta, options) => {
   if (!data?.flags?.['hey-wait']?.enabled) {
     return;
   }
@@ -223,6 +229,7 @@ Hooks.on('preUpdateTile', (scene, data, delta) => {
   // Record the selected animation type for the Hey, Wait! tile.
   if (delta?.heyWaitAnimType !== undefined) {
     data.flags['hey-wait'].animType = Number(delta?.heyWaitAnimType);
+    options.diff = true;
   }
 });
 
@@ -239,11 +246,27 @@ Hooks.on('updateTile', async (scene, data) => {
   await patterner.addPatterningToTile(updatedTile);
 });
 
-Hooks.on('preUpdateToken', async (scene, token) => {
+Hooks.on('preUpdateToken', async (scene, token, delta, diff, userId) => {
+  // We only want to be responsible for the current user's triggering and
+  // emitting that to other users. If we observe another user updating a
+  // token, don't worry about it and let them be in charge of emitting the
+  // triggering to us later.
+  if (game.data.userId !== userId) {
+    return;
+  }
+
   tokenUpdateCoordinator.registerTokenInitPos(token);
 });
 
-Hooks.on('updateToken', async (scene, token, delta) => {
+Hooks.on('updateToken', async (scene, token, delta, diff, userId) => {
+  // We only want to be responsible for the current user's triggering and
+  // emitting that to other users. If we observe another user updating a
+  // token, don't worry about it and let them be in charge of emitting the
+  // triggering to us later.
+  if (game.data.userId !== userId) {
+    return;
+  }
+
   // Exit early if there's no relevant updates. Specifically, if the token
   // has not moved or the game is actually paused.
   if (

@@ -14,13 +14,13 @@ export default class TokenUpdateCoordinator {
    *   The injected Triggering dependency.
    * @param {TokenCalculator} tokenCalculator
    *   The injected TokenCalculator dependency.
-   * @param {AnimationCoordinator} animationCoordinator
-   *   The injected AnimationCoordinator dependency.
+   * @param {ReactionCoordinator} reactionCoordinator
+   *   The injected ReactionCoordinator dependency.
    */
-  constructor(triggering, tokenCalculator, animationCoordinator) {
+  constructor(triggering, tokenCalculator, reactionCoordinator) {
     this.triggering = triggering;
     this.tokenCalculator = tokenCalculator;
-    this.animationCoordinator = animationCoordinator;
+    this.reactionCoordinator = reactionCoordinator;
 
     /**
      * Keep track of the Token's initial position between updates.
@@ -89,16 +89,17 @@ export default class TokenUpdateCoordinator {
     const t1 = performance.now();
     console.debug(`hey-wait | \`coordinateUpdate\` took ${t1 - t0}ms.`);
 
-    if (triggeredTile !== null) {
-      const animType = triggeredTile.data?.flags?.['hey-wait']?.animType
-        ?? Animator.animationTypes.TYPE_NONE;
-
-      await this
-        .animationCoordinator
-        .handleTokenAnimationAfterUpdate(scene, token, animType);
+    if (triggeredTile === null) {
+      this._cleanQueuedTokenInitPos(token._id);
+      return;
     }
 
-    this._cleanQueuedTokenInitPos(token._id);
+    const animType = triggeredTile.data?.flags?.['hey-wait']?.animType
+      ?? Animator.animationTypes.TYPE_NONE;
+
+    await this
+      .reactionCoordinator
+      .handleTokenReaction(scene, token, animType);
   }
 
   /**

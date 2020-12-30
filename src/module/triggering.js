@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 
+import Animator from './animator';
+
 /**
  * A class to handle any triggering logic and tile modification operations.
  */
@@ -9,13 +11,16 @@ export default class Triggering {
    *
    * @param {GameChanger} gameChanger
    *   The injected GameChanger dependency.
+   * @param {TokenAnimationWatcher} tokenAnimationWatcher
+   *   The injected TokenAnimationWatcher dependency.
    * @param {SocketController} socketController
    *   The injected SocketController dependency.
    * @param {Collision} collision
    *   The injected Collision dependency.
    */
-  constructor(gameChanger, socketController, collision) {
+  constructor(gameChanger, tokenAnimationWatcher, socketController, collision) {
     this.gameChanger = gameChanger;
+    this.tokenAnimationWatcher = tokenAnimationWatcher;
     this.socketController = socketController;
     this.collision = collision;
   }
@@ -32,11 +37,9 @@ export default class Triggering {
    * @param {string} viewedScene
    *   The ID of the currently viewed scene.
    *
-   * @return {Promise<boolean>}
+   * @return {Promise<Tile|null>}
    */
   async handleTileTriggering(tiles, token, initPos, viewedScene) {
-    let triggeredTile;
-
     for (const tile of tiles) {
       if (!this._isTileTriggered(tile, token, initPos)) {
         // eslint-disable-next-line no-continue
@@ -45,11 +48,10 @@ export default class Triggering {
 
       // eslint-disable-next-line no-await-in-loop
       await this._executeTrigger(token, tile, viewedScene);
-      triggeredTile = tile;
-      break;
+      return Promise.resolve(tile);
     }
 
-    return triggeredTile;
+    return Promise.resolve(null);
   }
 
   /**
@@ -95,24 +97,38 @@ export default class Triggering {
    * @private
    */
   async _executeTrigger(token, tile, viewedScene) {
-    const { x, y } = token;
-
     try {
       await this.gameChanger.execute(
         tile.data._id,
-        { x, y },
+        { x: token.x, y: token.y },
         viewedScene,
       );
     } catch (e) {
       console.error(`hey-wait | ${e.name}: ${e.message}`);
     }
 
+    // Ensure the Token's movement across the canvas, (the animation), is
+    // fully complete before emitting the Hey, Wait! event to other players.
+    await this.tokenAnimationWatcher.watchForCompletion(token._id);
+
+    const animType = tile.data?.flags?.['hey-wait']?.animType
+      ?? Animator.animationTypes.TYPE_NONE;
+
     // Emit the triggering to other users to their games can adjust accordingly.
-    await this.socketController.emit(
+    const socketControllerPromise = this.socketController.emit(
       token._id,
       tile.data._id,
       viewedScene,
+      { x: token.x, y: token.y },
+      animType,
     );
+
+    // ...and at the same time, pan to the Token's new position.
+    const panPromise = this.gameChanger.pan(
+      { x: token.x, y: token.y },
+    );
+
+    await Promise.all([socketControllerPromise, panPromise]);
   }
 
   /**

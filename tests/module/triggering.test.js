@@ -1,4 +1,5 @@
 import Triggering from 'module/triggering';
+import Animator from '../../src/module/animator';
 
 const initPos = {
   x: 1,
@@ -7,7 +8,8 @@ const initPos = {
 const viewedScene = 'a_viewed_scene';
 
 it('can exit early when checking if is hey wait tile when checking is triggered', async () => {
-  const triggering = new Triggering({}, {}, {});
+  // gameChanger, tokenAnimationWatcher, socketController, collision
+  const triggering = new Triggering({}, {}, {}, {});
   let result = await triggering.handleTileTriggering([], {}, initPos, 'a_viewed_scene');
   expect(result).toBeFalsy();
 
@@ -25,7 +27,7 @@ it('can exit early when checking if is hey wait tile when checking is triggered'
 });
 
 it('can exit early when checking if previously triggered when checking is triggered', async () => {
-  const triggering = new Triggering({}, {}, {});
+  const triggering = new Triggering({}, {}, {}, {});
   const tile = {
     data: {
       flags: {
@@ -47,7 +49,7 @@ it('can exit early when checking no collision when checking is triggered', async
     checkTileTokenCollision,
   };
 
-  const triggering = new Triggering({}, {}, mockCollision);
+  const triggering = new Triggering({}, {}, {}, mockCollision);
   const tile = {
     data: {
       flags: {
@@ -69,11 +71,21 @@ it('can determine a tile has been triggered', async () => {
 
   const mockGameChanger = {};
   mockGameChanger.execute = jest.fn();
+  mockGameChanger.pan = jest.fn();
 
   const mockSocketController = {};
   mockSocketController.emit = jest.fn();
 
-  const triggering = new Triggering(mockGameChanger, mockSocketController, mockCollision);
+  const mockTokenAnimationWatcher = {};
+  mockTokenAnimationWatcher.watchForCompletion = jest.fn();
+
+  const triggering = new Triggering(
+    mockGameChanger,
+    mockTokenAnimationWatcher,
+    mockSocketController,
+    mockCollision,
+  );
+
   const tile = {
     data: {
       _id: 'an_id',
@@ -106,10 +118,20 @@ it('can determine a tile has been triggered', async () => {
     'a_viewed_scene',
   );
 
+  expect(mockTokenAnimationWatcher.watchForCompletion).toHaveBeenCalledWith(
+    'a_token_id',
+  );
+
   expect(mockSocketController.emit).toHaveBeenCalledWith(
     'a_token_id',
     'an_id',
     'a_viewed_scene',
+    { x: 3, y: 4 },
+    Animator.animationTypes.TYPE_NONE,
+  );
+
+  expect(mockGameChanger.pan).toHaveBeenCalledWith(
+    { x: 3, y: 4 },
   );
 
   expect(result).toBeTruthy();
