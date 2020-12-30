@@ -39,11 +39,12 @@ If you would like to adjust the volume of the sound effects, the "Interface" vol
 ## Known Limitations :x:
 
 * No rotation allowed on Hey, Wait! tiles
+* Updating a Hey, Wait! Tile's reaction animation without refreshing the Scene will show the old reaction to players
 
 ## Future Planned Features :crystal_ball:
 
 * Ability to choose your define your own sound effects
-* Ability to customize the symbols and their font / colour in the animations  
+* Ability to customize the symbols and their font / colour in the reaction animations  
 * ...please suggest some!
 
 ## Acknowledgements :wave:
