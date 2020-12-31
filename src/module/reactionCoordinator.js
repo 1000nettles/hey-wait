@@ -79,6 +79,7 @@ export default class ReactionCoordinator {
     const sound = AudioHelper.play({
       src: path,
       autoplay: true,
+      volume: 0.5,
     }, false);
 
     // Wait until the sound is finished before resolving the promise.
