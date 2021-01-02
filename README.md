@@ -36,6 +36,10 @@ If you would like to adjust the volume of the sound effects, the "Interface" vol
 * **Restrict GM from Triggering Tiles:** If checked, triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM
 * **Disable Tile Triggering Sound Effects:** If checked, the module will disable playing sound effects when anyone triggers Hey, Wait! tiles. This will disable it for all players
 
+## Changelog :mag_right:
+
+Please see the [Changelog](https://github.com/1000nettles/hey-wait/blob/main/CHANGELOG.md) for all changes between updates
+
 ## Known Limitations :x:
 
 * No rotation allowed on Hey, Wait! tiles
