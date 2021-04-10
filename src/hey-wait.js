@@ -23,6 +23,7 @@ import TokenCalculator from './module/tokenCalculator';
 import ReactionCoordinator from './module/reactionCoordinator';
 import EntityFinder from './module/entityFinder';
 import TokenAnimationWatcher from './module/tokenAnimationWatcher';
+import UserOperations from './module/userOperations';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -66,6 +67,11 @@ let tileAuditor;
  * Our SocketController instance.
  */
 let socketController;
+
+/**
+ * Our UserOperations instance.
+ */
+let userOperations;
 
 /**
  * Our GameChanger instance.
@@ -131,6 +137,8 @@ Hooks.on('canvasReady', async () => {
     game.settings,
   );
 
+  userOperations = new UserOperations(game.user, game.settings);
+
   // Ensure that we only have a single socket open for our module so we don't
   // clutter up open sockets when changing scenes (or, more specifically,
   // rendering new canvases.)
@@ -143,6 +151,7 @@ Hooks.on('canvasReady', async () => {
     gameChanger,
     reactionCoordinator,
     entityFinder,
+    userOperations,
   );
 
   triggering = new Triggering(

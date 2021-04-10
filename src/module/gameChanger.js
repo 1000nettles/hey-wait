@@ -1,13 +1,10 @@
 import Constants from './constants';
 
-/* global canvas */
-/* global game */
-
 /**
  * A class to "change" the game when a Hey, Wait! event has been triggered.
  */
 export default class GameChanger {
-  constructor() {
+  constructor(game, canvas) {
     this.game = game;
     this.canvas = canvas;
   }
@@ -26,9 +23,7 @@ export default class GameChanger {
    * @return {Promise<void>}
    */
   async execute(tileId, location, sceneId) {
-    if (this.game.user.viewedScene !== sceneId) {
-      await this._changeScene(sceneId);
-    }
+    await this._changeScene(sceneId);
 
     if (this.game.user.isGM) {
       this._pause();

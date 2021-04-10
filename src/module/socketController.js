@@ -17,8 +17,10 @@ export default class SocketController {
    *   The current ReactionCoordinator instance.
    * @param {EntityFinder} entityFinder
    *   The current EntityFinder instance.
+   * @param {UserOperations} userOperations
+   *   The current UserOperations instance.
    */
-  constructor(socket, user, gameChanger, reactionCoordinator, entityFinder) {
+  constructor(socket, user, gameChanger, reactionCoordinator, entityFinder, userOperations) {
     /**
      * The current WebSocket instance.
      *
@@ -49,6 +51,13 @@ export default class SocketController {
      * The injected EntityFinder dependency.
      */
     this.entityFinder = entityFinder;
+
+    /**
+     * The injected UserOperations dependency.
+     *
+     * @type {UserOperations}
+     */
+    this.userOperations = userOperations;
 
     /**
      * The name of our socket.
@@ -119,6 +128,10 @@ export default class SocketController {
       console.debug(`hey-wait | Emission received on ${this.socketName}`);
 
       try {
+        if (!this.userOperations.canChangeGameForUser(data.sceneId)) {
+          return;
+        }
+
         const scene = this.entityFinder.findScene(data.sceneId);
 
         // 1. Change the game by potentially modifying the tile and pausing the

@@ -1,5 +1,5 @@
 import SocketController from 'module/socketController';
-import Animator from '../../src/module/animator';
+import Animator from 'module/animator';
 
 /* eslint-disable no-console */
 
@@ -8,9 +8,18 @@ let mockUser;
 let mockGameChanger;
 let mockReactionCoordinator;
 let mockEntityFinder;
+let mockUserOperations;
 let socketController;
 let mockTokenData;
 let mockTileData;
+
+const onCallbackData = {
+  tokenId: 'a_token_id',
+  tileId: 'a_tile_id',
+  sceneId: 'a_scene_id',
+  pos: { x: 1, y: 2 },
+  animType: Animator.animationTypes.TYPE_QUESTION,
+};
 
 beforeEach(() => {
   mockSocket = {};
@@ -18,6 +27,7 @@ beforeEach(() => {
   mockGameChanger = {};
   mockReactionCoordinator = {};
   mockEntityFinder = {};
+  mockUserOperations = {};
 
   mockGameChanger.pan = jest.fn();
 
@@ -42,31 +52,50 @@ beforeEach(() => {
   mockEntityFinder.findTokenData = jest.fn().mockReturnValue(mockTokenData);
   mockEntityFinder.findTileData = jest.fn().mockReturnValue(mockTileData);
 
+  mockUserOperations.canChangeGameForUser = jest.fn().mockReturnValue(true);
+
   socketController = new SocketController(
     mockSocket,
     mockUser,
     mockGameChanger,
     mockReactionCoordinator,
     mockEntityFinder,
+    mockUserOperations,
   );
 });
 
-it('should initialize the socket listener and listen', async () => {
+it('should initialize the socket listener, listen, and exit early if we cannot change scene for current user', async () => {
+  let socketOnArgs;
+
+  mockUserOperations.canChangeGameForUser = jest.fn().mockReturnValue(false);
+
+  mockSocket.on = jest.fn((...args) => {
+    socketOnArgs = args;
+
+    // This is the callback function for `socket.on`. Let's call it to
+    // validate what happens.
+    args[1](onCallbackData);
+  });
+
+  mockGameChanger.execute = jest.fn();
+
+  await socketController.init();
+
+  expect(socketOnArgs[0]).toEqual('module.hey-wait');
+  expect(mockGameChanger.execute).not.toHaveBeenCalled();
+  expect(mockReactionCoordinator.handleTokenReaction).not.toHaveBeenCalled();
+  expect(mockGameChanger.pan).not.toHaveBeenCalled();
+});
+
+it('should initialize the socket listener, listen, and handle all game changing', async () => {
   let socketOnArgs;
 
   mockSocket.on = jest.fn((...args) => {
     socketOnArgs = args;
-    const callbackData = {
-      tokenId: 'a_token_id',
-      tileId: 'a_tile_id',
-      sceneId: 'a_scene_id',
-      pos: { x: 1, y: 2 },
-      animType: Animator.animationTypes.TYPE_QUESTION,
-    };
 
     // This is the callback function for `socket.on`. Let's call it to
     // validate what happens.
-    args[1](callbackData);
+    args[1](onCallbackData);
   });
 
   mockGameChanger.execute = jest.fn();
@@ -89,7 +118,7 @@ it('should initialize the socket listener and listen', async () => {
   );
 });
 
-it('should initialize the socket listener and throw and error when executing on game changer', async () => {
+it('should initialize the socket listener and throw an error when executing on game changer', async () => {
   mockSocket.on = jest.fn((...args) => {
     const callbackData = {
       tokenId: 'a_token_id',
