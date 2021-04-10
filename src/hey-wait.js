@@ -35,6 +35,7 @@ import TokenAnimationWatcher from './module/tokenAnimationWatcher';
 /* global Hooks */
 /* global Scene */
 /* global TilesLayer */
+/* global TileConfig */
 /* global PIXI */
 /* global canvas */
 /* global loadTexture */
@@ -304,9 +305,14 @@ Hooks.on('getSceneControlButtons', (controls) => {
   );
 });
 
-Hooks.on('renderFormApplication', (tileConfig, html) => {
+Hooks.on('renderFormApplication', (config, html) => {
+  // Ensure the form application we're targeting is actually the Tile config.
+  // Ensure that we're also interacting with a Hey, Wait! tile, and not
+  // a regular tile.
   if (
-    !tileAuditor.isHeyWaitTile(tileConfig.object, game.activeTool)
+    !config?.options?.id
+    || config.options.id !== TileConfig.defaultOptions.id
+    || !tileAuditor.isHeyWaitTile(config.object, game.activeTool)
   ) {
     return;
   }
