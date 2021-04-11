@@ -7,6 +7,12 @@ const initPos = {
 };
 const viewedScene = 'a_viewed_scene';
 
+const mockMacroOperations = {};
+
+beforeEach(() => {
+  mockMacroOperations.handleTileMacroFiring = jest.fn();
+});
+
 it('can exit early when checking if is hey wait tile when checking is triggered', async () => {
   // gameChanger, tokenAnimationWatcher, socketController, collision
   const triggering = new Triggering({}, {}, {}, {});
@@ -84,6 +90,7 @@ it('can determine a tile has been triggered', async () => {
     mockTokenAnimationWatcher,
     mockSocketController,
     mockCollision,
+    mockMacroOperations,
   );
 
   const tile = {
@@ -133,6 +140,8 @@ it('can determine a tile has been triggered', async () => {
   expect(mockGameChanger.pan).toHaveBeenCalledWith(
     { x: 3, y: 4 },
   );
+
+  expect(mockMacroOperations.handleTileMacroFiring).toHaveBeenCalledWith('an_id');
 
   expect(result).toBeTruthy();
 });

@@ -24,6 +24,7 @@ import ReactionCoordinator from './module/reactionCoordinator';
 import EntityFinder from './module/entityFinder';
 import TokenAnimationWatcher from './module/tokenAnimationWatcher';
 import UserOperations from './module/userOperations';
+import MacroOperations from './module/macroOperations';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -41,6 +42,7 @@ import UserOperations from './module/userOperations';
 /* global canvas */
 /* global loadTexture */
 /* global game */
+/* global ui */
 /* global jQuery */
 /* global getProperty */
 /* global getFlag */
@@ -72,6 +74,11 @@ let socketController;
  * Our UserOperations instance.
  */
 let userOperations;
+
+/**
+ * Our MacroOperations instance.
+ */
+let macroOperations;
 
 /**
  * Our GameChanger instance.
@@ -137,6 +144,7 @@ Hooks.on('canvasReady', async () => {
     game.settings,
   );
 
+  macroOperations = new MacroOperations(game.user, canvas.tiles, game.macros, ui.notifications);
   userOperations = new UserOperations(game.user, game.settings);
 
   // Ensure that we only have a single socket open for our module so we don't
@@ -152,6 +160,7 @@ Hooks.on('canvasReady', async () => {
     reactionCoordinator,
     entityFinder,
     userOperations,
+    macroOperations,
   );
 
   triggering = new Triggering(
@@ -159,6 +168,7 @@ Hooks.on('canvasReady', async () => {
     new TokenAnimationWatcher(),
     socketController,
     collision,
+    macroOperations,
   );
   tileAuditor = new TileAuditor();
 
@@ -205,6 +215,7 @@ Hooks.on('preCreateTile', (scene, data) => {
     enabled: true,
     triggered: false,
     animType: Number(data.heyWaitAnimType),
+    macro: data.heyWaitMacro,
   };
 
   // Hey, Wait! tiles should be hidden so players cannot see them.
@@ -238,7 +249,13 @@ Hooks.on('preUpdateTile', (scene, data, delta, options) => {
 
   // Record the selected animation type for the Hey, Wait! tile.
   if (delta?.heyWaitAnimType !== undefined) {
-    data.flags['hey-wait'].animType = Number(delta?.heyWaitAnimType);
+    data.flags['hey-wait'].animType = Number(delta.heyWaitAnimType);
+    options.diff = true;
+  }
+
+  // Record the selected macro for the Hey, Wait! tile.
+  if (delta?.heyWaitMacro !== undefined) {
+    data.flags['hey-wait'].macro = delta.heyWaitMacro;
     options.diff = true;
   }
 });
@@ -329,6 +346,9 @@ Hooks.on('renderFormApplication', (config, html) => {
   const windowTitleEl = html.find('.window-title');
   const originalTitle = windowTitleEl.html();
   windowTitleEl.html(`Hey, Wait! ${originalTitle}`);
+
+  // Ensure we have the correct height for all the new Hey, Wait! elements.
+  html.height(320);
 });
 
 Hooks.on('renderTileConfig', (config) => {
@@ -338,11 +358,15 @@ Hooks.on('renderTileConfig', (config) => {
     return;
   }
 
-  const animType = config.object.data?.flags?.['hey-wait']?.animType
+  const selectedAnimType = config.object.data?.flags?.['hey-wait']?.animType
     ?? Animator.animationTypes.TYPE_NONE;
 
-  console.log('animtype');
-  console.log(animType);
+  const setMacro = config.object.data?.flags?.['hey-wait']?.macro;
+
+  // Ensure the "setMacro" exists and wasn't deleted.
+  const selectedMacro = setMacro && game.macros.get(setMacro)
+    ? setMacro
+    : 0;
 
   // Hide the file picker, rotation, and notes for Hey, Wait! tiling...
   const tileSpriteInputEl = jQuery(config.form).find('input[name="img"]');
@@ -365,6 +389,7 @@ Hooks.on('renderTileConfig', (config) => {
     'Configure this Hey, Wait! tile. Hey, Wait! tiles that are <span style="color:darkred;font-weight:bold;">red</span> have not been triggered yet. Hey, Wait! tiles that are <span style="color:green;font-weight:bold;">green</span> have already been triggered by players.',
   );
 
+  // Build "Trigger Animation Type" dropdown.
   const tileType = jQuery('<select></select>')
     .attr('name', 'heyWaitAnimType');
   const tileTypeKeys = Object.values(Animator.animationTypes);
@@ -382,7 +407,7 @@ Hooks.on('renderTileConfig', (config) => {
     jQuery(tileType).append(option);
   }
 
-  tileType.val(animType);
+  tileType.val(selectedAnimType);
 
   const tileTypeLabel = jQuery('<label></label>')
     .attr('for', 'heyWaitAnimType')
@@ -395,6 +420,39 @@ Hooks.on('renderTileConfig', (config) => {
   tileTypeWrapped.prepend(tileTypeLabel);
 
   jQuery(tileTypeWrapped).insertBefore(
+    jQuery(config.form).find(':submit'),
+  );
+
+  // Build "Macro" dropdown.
+  const macro = jQuery('<select></select>')
+    .attr('name', 'heyWaitMacro');
+
+  // Add "none" at start.
+  const noneOption = jQuery('<option></option>');
+  jQuery(noneOption).val(0);
+  jQuery(noneOption).html(game.i18n.localize('HEYWAIT.TILECONFIG.macroNone'));
+  jQuery(macro).append(noneOption);
+
+  game.macros.forEach((value, key) => {
+    const option = jQuery('<option></option>');
+    jQuery(option).val(key);
+    jQuery(option).html(value.data.name);
+    jQuery(macro).append(option);
+  });
+
+  macro.val(selectedMacro);
+
+  const macroLabel = jQuery('<label></label>')
+    .attr('for', 'heyWaitMacro')
+    .html(game.i18n.localize('HEYWAIT.TILECONFIG.macroText'));
+
+  const macroWrapped = macro
+    .wrap('<div class="form-group"></div>')
+    .parent();
+
+  macroWrapped.prepend(macroLabel);
+
+  jQuery(macroWrapped).insertBefore(
     jQuery(config.form).find(':submit'),
   );
 

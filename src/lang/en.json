@@ -11,5 +11,7 @@
   "HEYWAIT.TILECONFIG.typeNone": "None",
   "HEYWAIT.TILECONFIG.typeInfo": "Info ( ⓘ )",
   "HEYWAIT.TILECONFIG.typeQuestion": "Question ( ? )",
-  "HEYWAIT.TILECONFIG.typeExclamation": "Exclamation ( ! )"
+  "HEYWAIT.TILECONFIG.typeExclamation": "Exclamation ( ! )",
+  "HEYWAIT.TILECONFIG.macroText": "Trigger Macro",
+  "HEYWAIT.TILECONFIG.macroNone": "None"
 }

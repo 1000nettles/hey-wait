@@ -19,8 +19,18 @@ export default class SocketController {
    *   The current EntityFinder instance.
    * @param {UserOperations} userOperations
    *   The current UserOperations instance.
+   * @param {MacroOperations} macroOperations
+   *   The current MacroOperations instance.
    */
-  constructor(socket, user, gameChanger, reactionCoordinator, entityFinder, userOperations) {
+  constructor(
+    socket,
+    user,
+    gameChanger,
+    reactionCoordinator,
+    entityFinder,
+    userOperations,
+    macroOperations,
+  ) {
     /**
      * The current WebSocket instance.
      *
@@ -58,6 +68,13 @@ export default class SocketController {
      * @type {UserOperations}
      */
     this.userOperations = userOperations;
+
+    /**
+     * The injected MacroOperations dependency.
+     *
+     * @type {MacroOperations}
+     */
+    this.macroOperations = macroOperations;
 
     /**
      * The name of our socket.
@@ -152,7 +169,10 @@ export default class SocketController {
           { x: token.x, y: token.y },
         );
 
-        // 3. Animate the reaction and add SFX to it.
+        // 3. Handle any macro triggering.
+        this.macroOperations.handleTileMacroFiring(data.tileId);
+
+        // 4. Animate the reaction and add SFX to it.
         await this.reactionCoordinator.handleTokenReaction(
           scene,
           token,

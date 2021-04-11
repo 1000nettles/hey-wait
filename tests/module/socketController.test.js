@@ -9,6 +9,7 @@ let mockGameChanger;
 let mockReactionCoordinator;
 let mockEntityFinder;
 let mockUserOperations;
+let mockMacroOperations;
 let socketController;
 let mockTokenData;
 let mockTileData;
@@ -28,6 +29,7 @@ beforeEach(() => {
   mockReactionCoordinator = {};
   mockEntityFinder = {};
   mockUserOperations = {};
+  mockMacroOperations = {};
 
   mockGameChanger.pan = jest.fn();
 
@@ -53,6 +55,7 @@ beforeEach(() => {
   mockEntityFinder.findTileData = jest.fn().mockReturnValue(mockTileData);
 
   mockUserOperations.canChangeGameForUser = jest.fn().mockReturnValue(true);
+  mockMacroOperations.handleTileMacroFiring = jest.fn();
 
   socketController = new SocketController(
     mockSocket,
@@ -61,6 +64,7 @@ beforeEach(() => {
     mockReactionCoordinator,
     mockEntityFinder,
     mockUserOperations,
+    mockMacroOperations,
   );
 });
 
@@ -84,6 +88,7 @@ it('should initialize the socket listener, listen, and exit early if we cannot c
   expect(socketOnArgs[0]).toEqual('module.hey-wait');
   expect(mockGameChanger.execute).not.toHaveBeenCalled();
   expect(mockReactionCoordinator.handleTokenReaction).not.toHaveBeenCalled();
+  expect(mockMacroOperations.handleTileMacroFiring).not.toHaveBeenCalled();
   expect(mockGameChanger.pan).not.toHaveBeenCalled();
 });
 
@@ -116,6 +121,7 @@ it('should initialize the socket listener, listen, and handle all game changing'
   expect(mockGameChanger.pan).toHaveBeenCalledWith(
     { x: 1, y: 2 },
   );
+  expect(mockMacroOperations.handleTileMacroFiring).toHaveBeenCalledWith('a_tile_id');
 });
 
 it('should initialize the socket listener and throw an error when executing on game changer', async () => {

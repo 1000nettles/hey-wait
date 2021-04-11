@@ -31,6 +31,8 @@ Note that the visibility button has disappeared. Hey, Wait! tiles are always inv
 
 If you would like to adjust the volume of the sound effects, the "Interface" volume slider can be used. Or, you can disable the sound effects completely.
 
+You can also set a macro to be executed when a player triggers a Hey, Wait! tile. Configure this in the tile configuration dialog.
+
 ## Settings :ballot_box_with_check:
 
 * **Restrict GM from Triggering Tiles:** If checked, triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM
@@ -44,6 +46,7 @@ Please see the [Changelog](https://github.com/1000nettles/hey-wait/blob/main/CHA
 
 * No rotation allowed on Hey, Wait! tiles
 * Updating a Hey, Wait! Tile's reaction animation without refreshing the Scene will show the old reaction to players
+* Chat macros executed will always be from the GM's name, not the token who triggered the tile
 
 ## Future Planned Features :crystal_ball:
 

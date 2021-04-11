@@ -17,12 +17,21 @@ export default class Triggering {
    *   The injected SocketController dependency.
    * @param {Collision} collision
    *   The injected Collision dependency.
+   * @param {MacroOperations} macroOperations
+   *   The injected MacroOperations dependency.
    */
-  constructor(gameChanger, tokenAnimationWatcher, socketController, collision) {
+  constructor(
+    gameChanger,
+    tokenAnimationWatcher,
+    socketController,
+    collision,
+    macroOperations,
+  ) {
     this.gameChanger = gameChanger;
     this.tokenAnimationWatcher = tokenAnimationWatcher;
     this.socketController = socketController;
     this.collision = collision;
+    this.macroOperations = macroOperations;
   }
 
   /**
@@ -110,6 +119,8 @@ export default class Triggering {
     // Ensure the Token's movement across the canvas, (the animation), is
     // fully complete before emitting the Hey, Wait! event to other players.
     await this.tokenAnimationWatcher.watchForCompletion(token._id);
+
+    this.macroOperations.handleTileMacroFiring(tile.data._id);
 
     const animType = tile.data?.flags?.['hey-wait']?.animType
       ?? Animator.animationTypes.TYPE_NONE;
