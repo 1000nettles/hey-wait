@@ -45,7 +45,7 @@ export default class MacroOperations {
     }
 
     const macroId = tile.data?.flags?.['hey-wait']?.macro;
-    if (!macroId) {
+    if (!macroId || macroId === '0') {
       return;
     }
 
