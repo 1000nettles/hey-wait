@@ -8,7 +8,7 @@ export default () => {
     hint: game.i18n.localize('HEYWAIT.SETTINGS.restrictGmHint'),
     scope: 'world',
     config: true,
-    default: true,
+    default: false,
     type: Boolean,
   });
   game.settings.register(Constants.MODULE_NAME, 'warp-players', {
