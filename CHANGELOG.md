@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2021-04-11
+
+### Added
+
+- Added "Warp Players" setting (defaulting to false) to configure if players should be warped to the scene where a Hey, Wait! tile was triggered
+- Ability to associate a macro to a Hey, Wait! tile which is executed on trigger. This will always be executed as the GM
+
+### Changed
+- Fixed issue where "Hey, Wait!" was prepended to other form application windows
+- Set "restrict GM" setting to be false to prevent confusion with new users trying the module out
+
 ## [0.3.0] - 2020-12-30
 
 ### Added
