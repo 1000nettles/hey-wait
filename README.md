@@ -36,6 +36,7 @@ You can also set a macro to be executed when a player triggers a Hey, Wait! tile
 ## Settings :ballot_box_with_check:
 
 * **Restrict GM from Triggering Tiles:** If checked, triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM
+* **Warp Players:** If checked, triggering of a Hey, Wait! tile on a scene that a player isn't viewing will warp them to that scene. GMs will always be warped regardless
 * **Disable Tile Triggering Sound Effects:** If checked, the module will disable playing sound effects when anyone triggers Hey, Wait! tiles. This will disable it for all players
 
 ## Changelog :mag_right:
