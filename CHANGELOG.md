@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2021-05-16
+
+### Changed
+
+- Added support for FoundryVTT 0.8.x. No backwards compatability for 0.7.x
+- Overhauled how Hey, Wait! tiles are handled in the new version. Hey, Wait! tiles are seen as background, ground level tiles, and we bypass any overhead tile functionality
+- No more patterning on Hey, Wait! tiles. Unfortunately, Pixi's `TilingSprite` is not working with the new tiling system for some reason. Will try to revisit later
+
 ## [0.4.0] - 2021-04-11
 
 ### Added
@@ -14,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Ability to associate a macro to a Hey, Wait! tile which is executed on trigger. This will always be executed as the GM
 
 ### Changed
+
 - Fixed issue where "Hey, Wait!" was prepended to other form application windows
 - Set "restrict GM" setting to be false to prevent confusion with new users trying the module out
 

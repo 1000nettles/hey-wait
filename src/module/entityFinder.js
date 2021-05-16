@@ -48,32 +48,14 @@ export default class EntityFinder {
     const scene = this.findScene(sceneId);
     const { tokens } = scene.data;
 
-    const tokenData = tokens.find((token) => token._id === tokenId);
+    const tokenDocument = tokens.find((token) => token._id === tokenId);
 
-    if (!tokenData) {
-      throw new Error(`Could not find Token with ID ${tokenId} in Scene ${scene.data._id}`);
+    if (!tokenDocument) {
+      throw new Error(
+        `Could not find Token document with ID ${tokenId} in Scene ${scene.data._id}`,
+      );
     }
 
-    return tokenData;
-  }
-
-  /**
-   * Find the Tile by Tile ID.
-   *
-   * @param {string} tileId
-   *   The ID of the Tile.
-   *
-   * @return {Tile}
-   */
-  findTile(tileId) {
-    const tile = this.canvas.tiles.placeables.find(
-      (placeableTile) => placeableTile.data._id === tileId,
-    );
-
-    if (!tile) {
-      throw new Error(`Could not find Tile data with ID ${tileId}`);
-    }
-
-    return tile;
+    return tokenDocument.data;
   }
 }

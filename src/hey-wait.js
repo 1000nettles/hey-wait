@@ -17,7 +17,6 @@ import Constants from './module/constants';
 import SocketController from './module/socketController';
 import TokenUpdateCoordinator from './module/tokenUpdateCoordinator';
 import GameChanger from './module/gameChanger';
-import Patterner from './module/patterner';
 import Animator from './module/animator';
 import TokenCalculator from './module/tokenCalculator';
 import ReactionCoordinator from './module/reactionCoordinator';
@@ -31,11 +30,14 @@ import MacroOperations from './module/macroOperations';
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-param-reassign */
 /* eslint-disable func-names */
+/* global BackgroundLayer */
 /* global Canvas */
 /* global CanvasAnimation */
 /* global CONFIG */
+/* global ForegroundLayer */
 /* global Hooks */
 /* global Scene */
+/* global TileDocument */
 /* global TilesLayer */
 /* global TileConfig */
 /* global PIXI */
@@ -91,11 +93,6 @@ let gameChanger;
 let tokenUpdateCoordinator;
 
 /**
- * Our Patterner instance.
- */
-let patterner;
-
-/**
  * Our TokenCalculator instance.
  */
 let tokenCalculator;
@@ -132,7 +129,7 @@ Hooks.on('canvasReady', async () => {
   entityFinder = new EntityFinder(game, canvas);
 
   const layer = canvas.layers.find(
-    (targetLayer) => targetLayer instanceof TilesLayer,
+    (targetLayer) => targetLayer instanceof BackgroundLayer,
   );
 
   tokenCalculator = new TokenCalculator();
@@ -144,7 +141,12 @@ Hooks.on('canvasReady', async () => {
     game.settings,
   );
 
-  macroOperations = new MacroOperations(game.user, canvas.tiles, game.macros, ui.notifications);
+  macroOperations = new MacroOperations(
+    game.user,
+    canvas.background,
+    game.macros,
+    ui.notifications,
+  );
   userOperations = new UserOperations(game.user, game.settings);
 
   // Ensure that we only have a single socket open for our module so we don't
@@ -178,27 +180,10 @@ Hooks.on('canvasReady', async () => {
     reactionCoordinator,
   );
 
-  patterner = new Patterner();
-
   await socketController.init();
-
-  // Once the canvas is ready, ensure our Hey, Wait! tiles are using the correct
-  // patterning instead of a static image.
-  await canvas.tiles.placeables.forEach(async (tile) => {
-    if (
-      !tile.data?.flags?.['hey-wait']?.enabled
-    ) {
-      return;
-    }
-
-    patterner.addPatterningToTile(tile);
-  });
 });
 
-/* ------------------------------------ */
-/* When ready                           */
-/* ------------------------------------ */
-Hooks.on('preCreateTile', (scene, data) => {
+Hooks.on('preCreateTile', (document, data) => {
   // This is referencing the data attached from the form submission, not a flag.
   const isHeyWait = Boolean(data?.isHeyWaitTile);
 
@@ -207,9 +192,7 @@ Hooks.on('preCreateTile', (scene, data) => {
   }
 
   // Set the "hey-wait" flag on the new tile dataset.
-  if (!data?.flags) {
-    data.flags = {};
-  }
+  data.flags = data.flags || {};
 
   data.flags['hey-wait'] = {
     enabled: true,
@@ -222,20 +205,9 @@ Hooks.on('preCreateTile', (scene, data) => {
   data.hidden = true;
 });
 
-Hooks.on('createTile', async (scene, data) => {
-  if (
-    !data?.flags?.['hey-wait']?.enabled
-  ) {
-    return;
-  }
+Hooks.on('preUpdateTile', (document, change, options) => {
+  const { data } = document;
 
-  // As the hook doesn't pass the full Tile object, get it from the canvas
-  // and pass it to be patterned.
-  const createdTile = canvas.tiles.get(data._id);
-  await patterner.addPatterningToTile(createdTile);
-});
-
-Hooks.on('preUpdateTile', (scene, data, delta, options) => {
   if (!data?.flags?.['hey-wait']?.enabled) {
     return;
   }
@@ -243,37 +215,39 @@ Hooks.on('preUpdateTile', (scene, data, delta, options) => {
   // Ensure that Hey, Wait! tiles cannot be rotated.
   // Probably temporary, our logic for collision doesn't take into account
   // rotations.
-  if (delta?.rotation !== undefined) {
-    delta.rotation = 0;
+  if (change?.rotation !== undefined) {
+    change.rotation = 0;
   }
 
+  change.flags = change.flags || {};
+  change.flags['hey-wait'] = change.flags['hey-wait'] || {};
+
   // Record the selected animation type for the Hey, Wait! tile.
-  if (delta?.heyWaitAnimType !== undefined) {
-    data.flags['hey-wait'].animType = Number(delta.heyWaitAnimType);
+  if (change?.heyWaitAnimType !== undefined) {
+    change.flags['hey-wait'].animType = Number(change.heyWaitAnimType);
     options.diff = true;
   }
 
   // Record the selected macro for the Hey, Wait! tile.
-  if (delta?.heyWaitMacro !== undefined) {
-    data.flags['hey-wait'].macro = delta.heyWaitMacro;
+  if (change?.heyWaitMacro !== undefined) {
+    change.flags['hey-wait'].macro = change.heyWaitMacro;
     options.diff = true;
   }
-});
 
-Hooks.on('updateTile', async (scene, data) => {
-  if (
-    !data?.flags?.['hey-wait']?.enabled
-  ) {
-    return;
+  // Change the tile image depending on triggered state.
+  const triggered = change.flags['hey-wait']?.triggered;
+  if (triggered !== undefined) {
+    change.img = triggered ? Constants.TILE_GO_PATH : Constants.TILE_STOP_PATH;
+    options.diff = true;
   }
 
-  // As the hook doesn't pass the full Tile object, get it from the canvas
-  // and pass it to be patterned.
-  const updatedTile = canvas.tiles.get(data._id);
-  await patterner.addPatterningToTile(updatedTile);
+  // Clean the document for any Hey, Wait! residue.
+  delete data.isHeyWaitTile;
+  delete data.heyWaitAnimType;
+  delete data.heyWaitMacro;
 });
 
-Hooks.on('preUpdateToken', async (scene, token, delta, diff, userId) => {
+Hooks.on('preUpdateToken', async (document, change, options, userId) => {
   // We only want to be responsible for the current user's triggering and
   // emitting that to other users. If we observe another user updating a
   // token, don't worry about it and let them be in charge of emitting the
@@ -282,10 +256,12 @@ Hooks.on('preUpdateToken', async (scene, token, delta, diff, userId) => {
     return;
   }
 
-  tokenUpdateCoordinator.registerTokenInitPos(token);
+  tokenUpdateCoordinator.registerTokenInitPos(
+    document.toObject(),
+  );
 });
 
-Hooks.on('updateToken', async (scene, token, delta, diff, userId) => {
+Hooks.on('updateToken', async (document, change, options, userId) => {
   // We only want to be responsible for the current user's triggering and
   // emitting that to other users. If we observe another user updating a
   // token, don't worry about it and let them be in charge of emitting the
@@ -297,7 +273,7 @@ Hooks.on('updateToken', async (scene, token, delta, diff, userId) => {
   // Exit early if there's no relevant updates. Specifically, if the token
   // has not moved or the game is actually paused.
   if (
-    (delta?.x === undefined && delta?.y === undefined)
+    (change?.x === undefined && change?.y === undefined)
     || game.paused
   ) {
     return;
@@ -317,9 +293,9 @@ Hooks.on('updateToken', async (scene, token, delta, diff, userId) => {
   }
 
   await tokenUpdateCoordinator.coordinateUpdate(
-    token,
-    canvas.tiles.placeables,
-    scene,
+    document.toObject(),
+    canvas.background.tiles,
+    document.parent,
   );
 });
 
@@ -348,7 +324,7 @@ Hooks.on('renderFormApplication', (config, html) => {
   windowTitleEl.html(`Hey, Wait! ${originalTitle}`);
 
   // Ensure we have the correct height for all the new Hey, Wait! elements.
-  html.height(320);
+  html.height(384);
 });
 
 Hooks.on('renderTileConfig', (config) => {
@@ -369,23 +345,40 @@ Hooks.on('renderTileConfig', (config) => {
     : 0;
 
   // Hide the file picker, rotation, and notes for Hey, Wait! tiling...
-  const tileSpriteInputEl = jQuery(config.form).find('input[name="img"]');
-  const tileSpriteGroupEl = tileSpriteInputEl.closest('.form-group');
-  const rotationGroupEl = jQuery(config.form)
+  const $tileSpriteInputEl = jQuery(config.form).find(
+    'div[data-tab="basic"] input[name="img"]',
+  );
+
+  jQuery(config.form).find('.sheet-tabs a[data-tab!="basic"]').hide();
+  jQuery(config.form).find('.sheet-tabs a[data-tab="basic"]').html(
+    '<i class="fas fa-hand-paper"></i> Hey, Wait!',
+  );
+
+  const $tileSpriteGroupEl = $tileSpriteInputEl.closest('.form-group');
+  const $rotationGroupEl = jQuery(config.form)
     .find('input[name="rotation"]')
     .closest('.form-group');
-  const tileSpriteNotesEl = tileSpriteGroupEl.prev('.notes');
-  tileSpriteGroupEl.hide();
-  rotationGroupEl.hide();
-  tileSpriteNotesEl.hide();
+  const $tileSpriteNotesEl = $tileSpriteGroupEl.prev('.notes');
+  $tileSpriteGroupEl.hide();
+  $rotationGroupEl.hide();
+  $tileSpriteNotesEl.hide();
 
-  if (!tileSpriteInputEl.val()) {
-    tileSpriteInputEl.val(Constants.TILE_STOP_PATH);
+  const $opacityGroupEl = jQuery(config.form)
+    .find('input[name="alpha"]')
+    .closest('.form-group');
+  const $tintGroupEl = jQuery(config.form)
+    .find('input[name="tint"]')
+    .closest('.form-group');
+  $opacityGroupEl.hide();
+  $tintGroupEl.hide();
+
+  if (!$tileSpriteInputEl.val()) {
+    $tileSpriteInputEl.val(Constants.TILE_STOP_PATH);
   }
 
-  const newNotes = jQuery('<p>')
+  const $newNotes = jQuery('<p>')
     .attr('class', 'notes');
-  newNotes.html(
+  $newNotes.html(
     'Configure this Hey, Wait! tile. Hey, Wait! tiles that are <span style="color:darkred;font-weight:bold;">red</span> have not been triggered yet. Hey, Wait! tiles that are <span style="color:green;font-weight:bold;">green</span> have already been triggered by players.',
   );
 
@@ -419,41 +412,40 @@ Hooks.on('renderTileConfig', (config) => {
 
   tileTypeWrapped.prepend(tileTypeLabel);
 
-  jQuery(tileTypeWrapped).insertBefore(
-    jQuery(config.form).find(':submit'),
-  );
-
   // Build "Macro" dropdown.
-  const macro = jQuery('<select></select>')
+  const $macro = jQuery('<select></select>')
     .attr('name', 'heyWaitMacro');
 
   // Add "none" at start.
   const noneOption = jQuery('<option></option>');
   jQuery(noneOption).val(0);
   jQuery(noneOption).html(game.i18n.localize('HEYWAIT.TILECONFIG.macroNone'));
-  jQuery(macro).append(noneOption);
+  jQuery($macro).append(noneOption);
 
-  game.macros.forEach((value, key) => {
+  game.macros.forEach((macro) => {
     const option = jQuery('<option></option>');
-    jQuery(option).val(key);
-    jQuery(option).html(value.data.name);
-    jQuery(macro).append(option);
+    jQuery(option).val(macro.id);
+    jQuery(option).html(macro.data.name);
+    jQuery($macro).append(option);
   });
 
-  macro.val(selectedMacro);
+  $macro.val(selectedMacro);
 
-  const macroLabel = jQuery('<label></label>')
+  const $macroLabel = jQuery('<label></label>')
     .attr('for', 'heyWaitMacro')
     .html(game.i18n.localize('HEYWAIT.TILECONFIG.macroText'));
 
-  const macroWrapped = macro
+  const macroWrapped = $macro
     .wrap('<div class="form-group"></div>')
     .parent();
 
-  macroWrapped.prepend(macroLabel);
+  macroWrapped.prepend($macroLabel);
 
-  jQuery(macroWrapped).insertBefore(
-    jQuery(config.form).find(':submit'),
+  jQuery(config.form).find('div[data-tab="basic"]').first().append(
+    tileTypeWrapped,
+  );
+  jQuery(config.form).find('div[data-tab="basic"]').first().append(
+    macroWrapped,
   );
 
   // Add the hidden element specifying that this is a Hey, Wait! Tile.
@@ -462,36 +454,38 @@ Hooks.on('renderTileConfig', (config) => {
     .attr('name', 'isHeyWaitTile')
     .attr('value', 1);
 
-  newNotes.insertBefore(tileSpriteGroupEl);
+  $newNotes.insertBefore($tileSpriteGroupEl);
   jQuery(hidden).insertBefore(
     jQuery(config.form).find(':submit'),
   );
 });
 
 Hooks.on('renderTileHUD', async (tileHud, html) => {
-  const tile = tileHud.object;
+  const tileDocument = tileHud.object.document;
 
-  if (!tile.data?.flags?.['hey-wait']?.enabled) {
+  if (!tileDocument.data?.flags?.['hey-wait']?.enabled) {
     return;
   }
 
   // Hide the visibility icon as the Hey, Wait! tiles should always be hidden
   // from players' view.
-  html.find('.control-icon.visibility').hide();
+  html.find('.control-icon[data-action="visibility"]').hide();
+  html.find('.control-icon[data-action="overhead"]').hide();
+  html.find('.control-icon[data-action="underfoot"]').hide();
 
   // Append Hey, Wait! template for the HUD. We need to specify `isNotTriggered`
   // due to Handlebars not being able to inverse logic in a conditional.
   const form = await renderTemplate(Constants.TEMPLATE_HUD_PATH, {
-    isNotTriggered: !tile.data?.flags?.['hey-wait']?.triggered,
+    isNotTriggered: !tileDocument.data?.flags?.['hey-wait']?.triggered,
   });
   html.find('.col.right').prepend(form);
 
   html.find('.hey-wait-isNotTriggered').click(async () => {
     // Toggle the triggered state of the Hey, Wait! tile.
-    await tile.setFlag(
+    await tileDocument.setFlag(
       'hey-wait',
       'triggered',
-      !tile.getFlag('hey-wait', 'triggered'),
+      !tileDocument.getFlag('hey-wait', 'triggered'),
     );
 
     tileHud.render();

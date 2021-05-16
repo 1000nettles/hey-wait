@@ -4,16 +4,16 @@ export default class MacroOperations {
    *
    * @param {User} user
    *   The injected User dependency. The current user.
-   * @param {TilesLayer} tilesLayer
-   *   The injected TilesLayer dependency.
+   * @param {BackgroundLayer} backgroundLayer
+   *   The injected BackgroundLayer dependency.
    * @param {Map} macros
    *   The injected game macros map dependency.
    * @param {Notifications} notifications
    *   The injected Notifications dependency.
    */
-  constructor(user, tilesLayer, macros, notifications) {
+  constructor(user, backgroundLayer, macros, notifications) {
     this.user = user;
-    this.tilesLayer = tilesLayer;
+    this.backgroundLayer = backgroundLayer;
     this.macros = macros;
     this.notifications = notifications;
   }
@@ -33,9 +33,9 @@ export default class MacroOperations {
 
     let tile;
 
-    for (const placeable of this.tilesLayer.placeables) {
-      if (placeable.id === tileId) {
-        tile = placeable;
+    for (const bgTile of this.backgroundLayer.tiles) {
+      if (bgTile.id === tileId) {
+        tile = bgTile;
         break;
       }
     }

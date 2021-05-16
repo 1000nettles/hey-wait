@@ -1,6 +1,11 @@
 # Hey, Wait! :raised_hand:
 
+**0.8.x version:**
+![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.5.0.zip?style=flat-square)
+
+**0.7.x version:**
 ![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.4.0.zip?style=flat-square)
+
 ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fhey-wait&style=flat-square)
 ![Issues](https://img.shields.io/github/issues/1000nettles/hey-wait?style=flat-square)
 ![MIT License](https://img.shields.io/github/license/1000nettles/hey-wait?style=flat-square)
@@ -45,6 +50,7 @@ Please see the [Changelog](https://github.com/1000nettles/hey-wait/blob/main/CHA
 
 ## Known Limitations :x:
 
+* In the 0.8.x, patterning of Hey, Wait! tiles is not working (sorry!)
 * No rotation allowed on Hey, Wait! tiles
 * Updating a Hey, Wait! Tile's reaction animation without refreshing the Scene will show the old reaction to players
 * Chat macros executed will always be from the GM's name, not the token who triggered the tile

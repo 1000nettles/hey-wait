@@ -3,6 +3,9 @@
  */
 import Constants from './constants';
 
+/**
+ * Generate the control buttons / icons in the toolbar.
+ */
 export default class ControlsGenerator {
   /**
    * Generate the toolbar controls.
@@ -23,7 +26,23 @@ export default class ControlsGenerator {
       return;
     }
 
-    tileControl.tools.push({
+    // Insert the Hey, Wait! tile after the browse control button.
+    let browseControlIndex;
+    tileControl.tools.forEach((tool, index) => {
+      if (tool.name === 'browse') {
+        browseControlIndex = index + 1;
+      }
+    });
+
+    if (!browseControlIndex) {
+      // eslint-disable-next-line no-console
+      console.error(
+        'Could not find the "Browse Tile" control. Not adding Hey, Wait! control',
+      );
+      return;
+    }
+
+    tileControl.tools.splice(browseControlIndex, 0, {
       name: Constants.TOOLNAME,
       title: 'HEYWAIT.CONTROLS.TOOLS.heyWaitTile',
       icon: 'fas fa-hand-paper',

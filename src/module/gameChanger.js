@@ -59,18 +59,25 @@ export default class GameChanger {
    *   The relevant tile ID.
    */
   _handleTileChange(tileId) {
-    const tile = this.canvas.tiles.get(tileId);
+    const tile = this.canvas.background.get(tileId);
 
     if (!tile) {
       throw new Error(`Could not find a tile with ID ${tileId}`);
     }
 
-    tile.data.flags['hey-wait'].triggered = true;
-    tile.data.img = Constants.TILE_GO_PATH;
+    const { document } = tile;
 
-    tile.update(
-      tile.data,
-      { diff: false },
+    const update = {
+      flags: {
+        'hey-wait': {
+          triggered: true,
+        },
+      },
+      img: Constants.TILE_GO_PATH,
+    };
+
+    document.update(
+      update,
     );
   }
 

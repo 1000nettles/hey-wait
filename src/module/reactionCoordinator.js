@@ -76,7 +76,7 @@ export default class ReactionCoordinator {
     }
 
     const path = `modules/hey-wait/sounds/reaction${animType}.mp3`;
-    const sound = AudioHelper.play({
+    const sound = await AudioHelper.play({
       src: path,
       autoplay: true,
       volume: 0.5,
