@@ -4,7 +4,7 @@
 ![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.5.0.zip?style=flat-square)
 
 **0.7.x version:**
-![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.4.0.zip?style=flat-square)
+![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/v0.4.0/hey-wait-v0.4.0.zip?style=flat-square)
 
 ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fhey-wait&style=flat-square)
 ![Issues](https://img.shields.io/github/issues/1000nettles/hey-wait?style=flat-square)
