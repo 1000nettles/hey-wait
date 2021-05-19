@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.5.1] - 2021-05-18
+
+### Changed
+
+- Added support for FoundryVTT 0.8.4
+- Wrap document data changes in `preCreateTile` hook in correct update call. See https://gitlab.com/foundrynet/foundryvtt/-/issues/5126
+
 ## [0.5.0] - 2021-05-16
 
 ### Changed

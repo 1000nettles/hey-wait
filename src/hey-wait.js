@@ -203,6 +203,8 @@ Hooks.on('preCreateTile', (document, data) => {
 
   // Hey, Wait! tiles should be hidden so players cannot see them.
   data.hidden = true;
+
+  document.data.update(data);
 });
 
 Hooks.on('preUpdateTile', (document, change, options) => {
