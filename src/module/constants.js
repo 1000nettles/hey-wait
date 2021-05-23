@@ -21,6 +21,19 @@ export default class Constants {
   }
 
   /**
+   * The possible token disposition choices for triggering Hey, Wait! tiles.
+   *
+   * @return {object}
+   */
+  static get DISPOSITION_CHOICES() {
+    return {
+      FRIENDLY: 1,
+      FRIENDLY_NETURAL: 2,
+      FRIENDLY_NEUTRAL_HOSTILE: 3,
+    };
+  }
+
+  /**
    * The filepath to the HUD template.
    *
    * @return {string}

@@ -24,6 +24,7 @@ import EntityFinder from './module/entityFinder';
 import TokenAnimationWatcher from './module/tokenAnimationWatcher';
 import UserOperations from './module/userOperations';
 import MacroOperations from './module/macroOperations';
+import TokenHooks from './module/hooks/TokenHooks';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-unreachable */
@@ -33,6 +34,7 @@ import MacroOperations from './module/macroOperations';
 /* global BackgroundLayer */
 /* global Canvas */
 /* global CanvasAnimation */
+/* global CONST */
 /* global CONFIG */
 /* global ForegroundLayer */
 /* global Hooks */
@@ -112,6 +114,11 @@ let entityFinder;
  */
 let animator;
 
+/**
+ * Our TokenHooks instance.
+ */
+let tokenHooks;
+
 /* ------------------------------------ */
 /* Initialize module                    */
 /* ------------------------------------ */
@@ -173,6 +180,8 @@ Hooks.on('canvasReady', async () => {
     macroOperations,
   );
   tileAuditor = new TileAuditor();
+
+  tokenHooks = new TokenHooks(game.user, game.settings);
 
   tokenUpdateCoordinator = new TokenUpdateCoordinator(
     triggering,
@@ -249,49 +258,21 @@ Hooks.on('preUpdateTile', (document, change, options) => {
   delete data.heyWaitMacro;
 });
 
-Hooks.on('preUpdateToken', async (document, change, options, userId) => {
-  // We only want to be responsible for the current user's triggering and
-  // emitting that to other users. If we observe another user updating a
-  // token, don't worry about it and let them be in charge of emitting the
-  // triggering to us later.
-  if (game.data.userId !== userId) {
-    return;
-  }
-
+Hooks.on('preUpdateToken', async (document) => {
   tokenUpdateCoordinator.registerTokenInitPos(
     document.toObject(),
   );
 });
 
-Hooks.on('updateToken', async (document, change, options, userId) => {
-  // We only want to be responsible for the current user's triggering and
-  // emitting that to other users. If we observe another user updating a
-  // token, don't worry about it and let them be in charge of emitting the
-  // triggering to us later.
-  if (game.data.userId !== userId) {
+Hooks.on('updateToken', async (document, change) => {
+  const canRunUpdate = tokenHooks.canRunTokenUpdate(
+    change,
+    document.data.disposition,
+    game.paused,
+  );
+
+  if (!canRunUpdate) {
     return;
-  }
-
-  // Exit early if there's no relevant updates. Specifically, if the token
-  // has not moved or the game is actually paused.
-  if (
-    (change?.x === undefined && change?.y === undefined)
-    || game.paused
-  ) {
-    return;
-  }
-
-  if (game.user.isGM) {
-    const restrictGm = game.settings.get(
-      Constants.MODULE_NAME,
-      'restrict-gm',
-    );
-
-    // If we are restricting a GM from triggering Hey, Wait! tiles, let's exit
-    // early so they don't move through the triggering flow.
-    if (restrictGm) {
-      return;
-    }
   }
 
   await tokenUpdateCoordinator.coordinateUpdate(

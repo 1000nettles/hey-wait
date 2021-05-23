@@ -1,6 +1,11 @@
 {
   "HEYWAIT.SETTINGS.restrictGmName": "Restrict GM from Triggering Tiles",
   "HEYWAIT.SETTINGS.restrictGmHint": "Triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM.",
+  "HEYWAIT.SETTINGS.dispositionName": "Token Disposition Types Allowed",
+  "HEYWAIT.SETTINGS.dispositionHint": "The token disposition types that are allowed to trigger Hey, Wait! tiles.",
+  "HEYWAIT.SETTINGS.dispositionChoiceFriendly": "Friendly",
+  "HEYWAIT.SETTINGS.dispositionChoiceFriendlyNeutral": "Friendly, Neutral",
+  "HEYWAIT.SETTINGS.dispositionChoiceFriendlyNeutralHostile": "Friendly, Neutral, Hostile",
   "HEYWAIT.SETTINGS.warpPlayersName": "Warp Players on Tile Trigger",
   "HEYWAIT.SETTINGS.warpPlayersHint": "Triggering a Hey, Wait! tile on a scene that a player isn't viewing will warp them to that scene. GMs will always be warped regardless.",
   "HEYWAIT.SETTINGS.disableSfxName": "Disable Tile Triggering Sound Effects",
