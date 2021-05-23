@@ -1,4 +1,4 @@
-import TokenCalculator from 'module/tokenCalculator';
+import TokenCalculator from 'module/TokenCalculator';
 
 it('can calculate the token coordinates', () => {
   const calculator = new TokenCalculator();

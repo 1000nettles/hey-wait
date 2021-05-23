@@ -1,5 +1,5 @@
-import Triggering from 'module/triggering';
-import Animator from '../../src/module/animator';
+import Triggering from 'module/Triggering';
+import Animator from 'module/Animator';
 
 const initPos = {
   x: 1,

@@ -1,4 +1,4 @@
-import Animator from 'module/animator';
+import Animator from 'module/Animator';
 
 const ease = jest.createMockFromModule('pixi-ease');
 ease.add = jest.fn();

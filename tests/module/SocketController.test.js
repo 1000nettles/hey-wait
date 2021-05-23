@@ -1,5 +1,5 @@
-import SocketController from 'module/socketController';
-import Animator from 'module/animator';
+import SocketController from 'module/SocketController';
+import Animator from 'module/Animator';
 
 /* eslint-disable no-console */
 

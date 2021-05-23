@@ -1,4 +1,4 @@
-import UserOperations from 'module/userOperations';
+import UserOperations from 'module/UserOperations';
 
 it('should be allowed to change game for user if GM', () => {
   const mockUser = {

@@ -1,5 +1,5 @@
 import TokenHooks from 'module/hooks/TokenHooks';
-import Constants from 'module/constants';
+import Constants from 'module/Constants';
 
 describe('token hooks tests', () => {
   global.CONST = {};
