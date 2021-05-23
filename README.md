@@ -1,7 +1,7 @@
 # Hey, Wait! :raised_hand:
 
 **0.8.x version:**
-![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.5.1.zip?style=flat-square)
+![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.6.0.zip?style=flat-square)
 
 **0.7.x version:**
 ![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/v0.4.0/hey-wait-v0.4.0.zip?style=flat-square)
@@ -40,6 +40,7 @@ You can also set a macro to be executed when a player triggers a Hey, Wait! tile
 
 ## Settings :ballot_box_with_check:
 
+* **Token Disposition Types Allowed** The token disposition types that are allowed to trigger Hey, Wait! tiles. Defaults to "Friendly" only
 * **Restrict GM from Triggering Tiles:** If checked, triggering of the Hey, Wait! tiles will be locked down to only player's token movement and not the GM
 * **Warp Players:** If checked, triggering of a Hey, Wait! tile on a scene that a player isn't viewing will warp them to that scene. GMs will always be warped regardless
 * **Disable Tile Triggering Sound Effects:** If checked, the module will disable playing sound effects when anyone triggers Hey, Wait! tiles. This will disable it for all players
