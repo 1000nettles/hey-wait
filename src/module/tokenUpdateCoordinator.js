@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* global performance */
 
-import Animator from './animator';
+import Animator from './Animator';
 
 /**
  * Coordinate any Token updates from the Foundry Hook system.

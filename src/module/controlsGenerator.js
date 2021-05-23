@@ -1,7 +1,7 @@
 /**
  * Facilitate the generation of the Controls for the toolbar.
  */
-import Constants from './constants';
+import Constants from './Constants';
 
 /**
  * Generate the control buttons / icons in the toolbar.

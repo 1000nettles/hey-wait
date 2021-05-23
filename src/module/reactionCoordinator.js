@@ -2,8 +2,8 @@
 /* eslint-disable no-await-in-loop */
 /* global AudioHelper */
 
-import Animator from './animator';
-import Constants from './constants';
+import Animator from './Animator';
+import Constants from './Constants';
 
 /**
  * Coordinate processing and running any reactions within the module.

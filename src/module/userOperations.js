@@ -1,4 +1,4 @@
-import Constants from './constants';
+import Constants from './Constants';
 
 /**
  * A class for determining if specific user operations are allowed.

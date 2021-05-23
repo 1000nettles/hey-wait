@@ -6,53 +6,27 @@
  * Software License: MIT
  */
 
-// Import JavaScript modules.
 import { ease } from 'pixi-ease';
 import registerSettings from './module/settings';
-import ControlsGenerator from './module/controlsGenerator';
-import Collision from './module/collision';
-import Triggering from './module/triggering';
-import TileAuditor from './module/tileAuditor';
-import Constants from './module/constants';
-import SocketController from './module/socketController';
-import TokenUpdateCoordinator from './module/tokenUpdateCoordinator';
-import GameChanger from './module/gameChanger';
-import Animator from './module/animator';
-import TokenCalculator from './module/tokenCalculator';
-import ReactionCoordinator from './module/reactionCoordinator';
-import EntityFinder from './module/entityFinder';
-import TokenAnimationWatcher from './module/tokenAnimationWatcher';
-import UserOperations from './module/userOperations';
-import MacroOperations from './module/macroOperations';
+import ControlsGenerator from './module/ControlsGenerator';
+import Collision from './module/Collision';
+import Triggering from './module/Triggering';
+import TileAuditor from './module/TileAuditor';
+import Constants from './module/Constants';
+import SocketController from './module/SocketController';
+import TokenUpdateCoordinator from './module/TokenUpdateCoordinator';
+import GameChanger from './module/GameChanger';
+import Animator from './module/Animator';
+import TokenCalculator from './module/TokenCalculator';
+import ReactionCoordinator from './module/ReactionCoordinator';
+import EntityFinder from './module/EntityFinder';
+import TokenAnimationWatcher from './module/TokenAnimationWatcher';
+import UserOperations from './module/UserOperations';
+import MacroOperations from './module/MacroOperations';
 import TokenHooks from './module/hooks/TokenHooks';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
-/* eslint-disable no-unreachable */
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-param-reassign */
-/* eslint-disable func-names */
-/* global BackgroundLayer */
-/* global Canvas */
-/* global CanvasAnimation */
-/* global CONST */
-/* global CONFIG */
-/* global ForegroundLayer */
-/* global Hooks */
-/* global Scene */
-/* global TileDocument */
-/* global TilesLayer */
-/* global TileConfig */
-/* global PIXI */
-/* global canvas */
-/* global loadTexture */
-/* global game */
-/* global ui */
-/* global jQuery */
-/* global getProperty */
-/* global getFlag */
-/* global mergeObject */
-/* global renderTemplate */
-/* global setFlag */
 
 /**
  * Our Collision instance.
@@ -119,10 +93,17 @@ let animator;
  */
 let tokenHooks;
 
+// Extract our early available dependencies out of the global scope.
+const {
+  Hooks,
+  jQuery,
+  renderTemplate,
+} = global;
+
 /* ------------------------------------ */
 /* Initialize module                    */
 /* ------------------------------------ */
-Hooks.once('init', async () => {
+Hooks.once('init', () => {
   console.log('hey-wait | Initializing hey-wait');
   registerSettings();
 });
@@ -131,12 +112,15 @@ Hooks.once('init', async () => {
 /* Setup module                         */
 /* ------------------------------------ */
 Hooks.on('canvasReady', async () => {
+  const { canvas, game, ui } = global;
+  const backgroundLayer = global.CONFIG.Canvas.layers.background;
+
   collision = new Collision(canvas.grid.size);
   gameChanger = new GameChanger(game, canvas);
   entityFinder = new EntityFinder(game, canvas);
 
   const layer = canvas.layers.find(
-    (targetLayer) => targetLayer instanceof BackgroundLayer,
+    (targetLayer) => targetLayer instanceof backgroundLayer,
   );
 
   tokenCalculator = new TokenCalculator();
@@ -224,8 +208,7 @@ Hooks.on('preUpdateTile', (document, change, options) => {
   }
 
   // Ensure that Hey, Wait! tiles cannot be rotated.
-  // Probably temporary, our logic for collision doesn't take into account
-  // rotations.
+  // Currently, our logic for collision doesn't take into account rotations.
   if (change?.rotation !== undefined) {
     change.rotation = 0;
   }
@@ -268,7 +251,7 @@ Hooks.on('updateToken', async (document, change) => {
   const canRunUpdate = tokenHooks.canRunTokenUpdate(
     change,
     document.data.disposition,
-    game.paused,
+    global.game.paused,
   );
 
   if (!canRunUpdate) {
@@ -277,7 +260,7 @@ Hooks.on('updateToken', async (document, change) => {
 
   await tokenUpdateCoordinator.coordinateUpdate(
     document.toObject(),
-    canvas.background.tiles,
+    global.canvas.background.tiles,
     document.parent,
   );
 });
@@ -286,7 +269,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
   const controlsGenerator = new ControlsGenerator();
   controlsGenerator.generate(
     controls,
-    game.user.isGM,
+    global.game.user.isGM,
   );
 });
 
@@ -296,8 +279,8 @@ Hooks.on('renderFormApplication', (config, html) => {
   // a regular tile.
   if (
     !config?.options?.id
-    || config.options.id !== TileConfig.defaultOptions.id
-    || !tileAuditor.isHeyWaitTile(config.object, game.activeTool)
+    || config.options.id !== global.CONFIG.Tile.sheetClass.defaultOptions.id
+    || !tileAuditor.isHeyWaitTile(config.object, global.game.activeTool)
   ) {
     return;
   }
@@ -311,6 +294,8 @@ Hooks.on('renderFormApplication', (config, html) => {
 });
 
 Hooks.on('renderTileConfig', (config) => {
+  const { game } = global;
+
   if (
     !tileAuditor.isHeyWaitTile(config.object, game.activeTool)
   ) {

@@ -1,4 +1,4 @@
-import Constants from './constants';
+import Constants from './Constants';
 
 /**
  * A class to "change" the game when a Hey, Wait! event has been triggered.

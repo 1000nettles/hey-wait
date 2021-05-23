@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import Animator from './animator';
+import Animator from './Animator';
 
 /**
  * A class to handle any triggering logic and tile modification operations.
