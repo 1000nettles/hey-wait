@@ -259,9 +259,8 @@ Hooks.on('updateToken', async (document, change) => {
   }
 
   await tokenUpdateCoordinator.coordinateUpdate(
-    document.toObject(),
+    document,
     global.canvas.background.tiles,
-    document.parent,
   );
 });
 

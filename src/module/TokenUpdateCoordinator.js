@@ -59,38 +59,36 @@ export default class TokenUpdateCoordinator {
    * Checks all applicable tiles for if they have been triggered or not. If
    * they have, execute the functionality for triggering a tile.
    *
-   * @param {Token} token
-   *   The Token getting updated.
+   * @param {TokenDocument} tokenDoc
+   *   The Token document getting updated.
    * @param {Array} tiles
    *   All of the potential tiles to check for triggers.
-   * @param {Scene} scene
-   *   The currently viewed Scene.
    */
-  async coordinateUpdate(token, tiles, scene) {
+  async coordinateUpdate(tokenDoc, tiles) {
     const t0 = performance.now();
 
     // Let's find the previously stored Token initial position.
-    const initPos = this.tokenInitPos.get(token._id);
+    const initPos = this.tokenInitPos.get(tokenDoc.id);
 
     if (!initPos) {
       // We may not have created an update queued previously, due to a
       // lightweight update or something else. Just cleanup and exit.
-      this._cleanQueuedTokenInitPos(token._id);
+      this._cleanQueuedTokenInitPos(tokenDoc.id);
       return;
     }
 
     const triggeredTile = await this.triggering.handleTileTriggering(
       tiles,
-      token,
+      tokenDoc,
       initPos,
-      scene.data._id,
+      tokenDoc.parent.id,
     );
 
     const t1 = performance.now();
     console.debug(`hey-wait | \`coordinateUpdate\` took ${t1 - t0}ms.`);
 
     if (triggeredTile === null) {
-      this._cleanQueuedTokenInitPos(token._id);
+      this._cleanQueuedTokenInitPos(tokenDoc.id);
       return;
     }
 
@@ -99,7 +97,7 @@ export default class TokenUpdateCoordinator {
 
     await this
       .reactionCoordinator
-      .handleTokenReaction(scene, token, animType);
+      .handleTokenReaction(tokenDoc.parent, tokenDoc.object, animType);
   }
 
   /**

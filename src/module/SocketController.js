@@ -159,10 +159,13 @@ export default class SocketController {
           data.sceneId,
         );
 
-        const token = this.entityFinder.findTokenData(
+        const tokenDoc = this.entityFinder.findTokenDocument(
           data.tokenId,
           data.sceneId,
         );
+
+        const token = tokenDoc.object;
+        console.log(token);
 
         // 2. Pan to the location where the event and reaction occurred.
         await this.gameChanger.pan(
@@ -170,7 +173,7 @@ export default class SocketController {
         );
 
         // 3. Handle any macro triggering.
-        this.macroOperations.handleTileMacroFiring(data.tileId);
+        this.macroOperations.handleTileMacroFiring(data.tileId, tokenDoc);
 
         // 4. Animate the reaction and add SFX to it.
         await this.reactionCoordinator.handleTokenReaction(

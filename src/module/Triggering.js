@@ -39,8 +39,8 @@ export default class Triggering {
    *
    * @param {Array} tiles
    *   The Tiles to check for triggering.
-   * @param {Token} token
-   *   The token to check the trigger from.
+   * @param {TokenDocument} tokenDoc
+   *   The TokenDocument to check the trigger from.
    * @param {x,y} initPos
    *   The initial position of the Token.
    * @param {string} viewedScene
@@ -48,15 +48,15 @@ export default class Triggering {
    *
    * @return {Promise<Tile|null>}
    */
-  async handleTileTriggering(tiles, token, initPos, viewedScene) {
+  async handleTileTriggering(tiles, tokenDoc, initPos, viewedScene) {
     for (const tile of tiles) {
-      if (!this._isTileTriggered(tile, token, initPos)) {
+      if (!this._isTileTriggered(tile, tokenDoc, initPos)) {
         // eslint-disable-next-line no-continue
         continue;
       }
 
       // eslint-disable-next-line no-await-in-loop
-      await this._executeTrigger(token, tile, viewedScene);
+      await this._executeTrigger(tokenDoc, tile, viewedScene);
       return Promise.resolve(tile);
     }
 
@@ -68,15 +68,15 @@ export default class Triggering {
    *
    * @param {Tile} tile
    *   The Tile to check for.
-   * @param {Token} token
-   *   The Token to check for.
+   * @param {TokenDocument} tokenDoc
+   *   The TokenDocument to check for.
    * @param {x,y} initTokenPos
    *   The initial position of the Token before it was updated. X and Y values.
    *
    * @return {boolean}
    *   If the tile has been triggered by the token's movement.
    */
-  _isTileTriggered(tile, token, initTokenPos) {
+  _isTileTriggered(tile, tokenDoc, initTokenPos) {
     if (!this._isHeyWaitTile(tile)) {
       return false;
     }
@@ -85,7 +85,7 @@ export default class Triggering {
       return false;
     }
 
-    if (!this.collision.checkTileTokenCollision(tile, token, initTokenPos)) {
+    if (!this.collision.checkTileTokenCollision(tile, tokenDoc.object, initTokenPos)) {
       return false;
     }
 
@@ -96,8 +96,8 @@ export default class Triggering {
    * Execute triggered functionality, like changing the game and emitting
    * the execution to the SocketController.
    *
-   * @param {Token} token
-   *   The token that triggered the tile.
+   * @param {TokenDocument} tokenDoc
+   *   The TokenDocument that triggered the tile.
    * @param {Tile} tile
    *   The tile that was triggered.
    * @param {string} viewedScene
@@ -105,10 +105,12 @@ export default class Triggering {
    *
    * @private
    */
-  async _executeTrigger(token, tile, viewedScene) {
+  async _executeTrigger(tokenDoc, tile, viewedScene) {
+    const token = tokenDoc.object;
+
     try {
       await this.gameChanger.execute(
-        tile.data._id,
+        tile.id,
         { x: token.x, y: token.y },
         viewedScene,
       );
@@ -118,26 +120,26 @@ export default class Triggering {
 
     // Ensure the Token's movement across the canvas, (the animation), is
     // fully complete before emitting the Hey, Wait! event to other players.
-    await this.tokenAnimationWatcher.watchForCompletion(token._id);
+    await this.tokenAnimationWatcher.watchForCompletion(tokenDoc.id);
 
-    this.macroOperations.handleTileMacroFiring(tile.data._id);
+    this.macroOperations.handleTileMacroFiring(tile.id, tokenDoc);
 
     const animType = tile.data?.flags?.['hey-wait']?.animType
       ?? Animator.animationTypes.TYPE_NONE;
 
+    const coords = { x: token.x, y: token.y };
+
     // Emit the triggering to other users to their games can adjust accordingly.
     const socketControllerPromise = this.socketController.emit(
-      token._id,
-      tile.data._id,
+      tokenDoc.id,
+      tile.id,
       viewedScene,
-      { x: token.x, y: token.y },
+      coords,
       animType,
     );
 
     // ...and at the same time, pan to the Token's new position.
-    const panPromise = this.gameChanger.pan(
-      { x: token.x, y: token.y },
-    );
+    const panPromise = this.gameChanger.pan(coords);
 
     await Promise.all([socketControllerPromise, panPromise]);
   }

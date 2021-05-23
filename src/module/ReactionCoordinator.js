@@ -41,7 +41,7 @@ export default class ReactionCoordinator {
   async handleTokenReaction(scene, token, animType) {
     const coords = this.tokenCalculator.calculateCoordinates(
       scene,
-      token,
+      token.data,
     );
 
     this.animator.animate(

@@ -94,8 +94,8 @@ it('can determine a tile has been triggered', async () => {
   );
 
   const tile = {
+    id: 'an_id',
     data: {
-      _id: 'an_id',
       flags: {
         'hey-wait': {
           enabled: true,
@@ -106,12 +106,15 @@ it('can determine a tile has been triggered', async () => {
   };
 
   const token = {
-    _id: 'a_token_id',
     x: 3,
     y: 4,
   };
+  const tokenDoc = {
+    id: 'a_token_id',
+    object: token,
+  };
 
-  const result = await triggering.handleTileTriggering([tile], token, initPos, viewedScene);
+  const result = await triggering.handleTileTriggering([tile], tokenDoc, initPos, viewedScene);
 
   expect(mockCollision.checkTileTokenCollision).toHaveBeenCalledWith(
     tile,
@@ -141,7 +144,10 @@ it('can determine a tile has been triggered', async () => {
     { x: 3, y: 4 },
   );
 
-  expect(mockMacroOperations.handleTileMacroFiring).toHaveBeenCalledWith('an_id');
+  expect(mockMacroOperations.handleTileMacroFiring).toHaveBeenCalledWith(
+    'an_id',
+    tokenDoc,
+  );
 
   expect(result).toBeTruthy();
 });

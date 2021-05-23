@@ -25,8 +25,10 @@ export default class MacroOperations {
    *
    * @param {string} tileId
    *   The relevant tile ID.
+   * @param {TokenDocument} tokenDoc
+   *   The relevant TokenDocument that is the protagonist.
    */
-  handleTileMacroFiring(tileId) {
+  handleTileMacroFiring(tileId, tokenDoc) {
     if (!this.user.isGM) {
       return;
     }
@@ -57,6 +59,9 @@ export default class MacroOperations {
       return;
     }
 
-    macro.execute();
+    macro.execute({
+      actor: tokenDoc.getActor(),
+      token: tokenDoc.object,
+    });
   }
 }

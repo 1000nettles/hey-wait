@@ -35,7 +35,7 @@ export default class EntityFinder {
   }
 
   /**
-   * Find the Token data by Token ID.
+   * Find the TokenDocument by Token ID.
    *
    * @param {string} tokenId
    *   The ID of the Token.
@@ -44,11 +44,11 @@ export default class EntityFinder {
    *
    * @return {Object}
    */
-  findTokenData(tokenId, sceneId) {
+  findTokenDocument(tokenId, sceneId) {
     const scene = this.findScene(sceneId);
     const { tokens } = scene.data;
 
-    const tokenDocument = tokens.find((token) => token._id === tokenId);
+    const tokenDocument = tokens.find((token) => token.id === tokenId);
 
     if (!tokenDocument) {
       throw new Error(
@@ -56,6 +56,6 @@ export default class EntityFinder {
       );
     }
 
-    return tokenDocument.data;
+    return tokenDocument;
   }
 }

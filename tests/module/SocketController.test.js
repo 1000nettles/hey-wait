@@ -11,7 +11,8 @@ let mockEntityFinder;
 let mockUserOperations;
 let mockMacroOperations;
 let socketController;
-let mockTokenData;
+let mockToken;
+let mockTokenDoc;
 let mockTileData;
 
 const onCallbackData = {
@@ -35,10 +36,13 @@ beforeEach(() => {
 
   mockReactionCoordinator.handleTokenReaction = jest.fn();
 
-  mockTokenData = {
-    _id: 'a_token_id',
+  mockToken = {
     x: 1,
     y: 2,
+  };
+  mockTokenDoc = {
+    id: 'a_token_id',
+    object: mockToken,
   };
 
   mockTileData = {
@@ -51,7 +55,7 @@ beforeEach(() => {
   };
 
   mockEntityFinder.findScene = jest.fn().mockReturnValue('a_scene');
-  mockEntityFinder.findTokenData = jest.fn().mockReturnValue(mockTokenData);
+  mockEntityFinder.findTokenDocument = jest.fn().mockReturnValue(mockTokenDoc);
   mockEntityFinder.findTileData = jest.fn().mockReturnValue(mockTileData);
 
   mockUserOperations.canChangeGameForUser = jest.fn().mockReturnValue(true);
@@ -115,13 +119,16 @@ it('should initialize the socket listener, listen, and handle all game changing'
   );
   expect(mockReactionCoordinator.handleTokenReaction).toHaveBeenCalledWith(
     'a_scene',
-    mockTokenData,
+    mockToken,
     Animator.animationTypes.TYPE_QUESTION,
   );
   expect(mockGameChanger.pan).toHaveBeenCalledWith(
     { x: 1, y: 2 },
   );
-  expect(mockMacroOperations.handleTileMacroFiring).toHaveBeenCalledWith('a_tile_id');
+  expect(mockMacroOperations.handleTileMacroFiring).toHaveBeenCalledWith(
+    'a_tile_id',
+    mockTokenDoc,
+  );
 });
 
 it('should initialize the socket listener and throw an error when executing on game changer', async () => {
