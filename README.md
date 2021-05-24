@@ -10,7 +10,7 @@
 ![Issues](https://img.shields.io/github/issues/1000nettles/hey-wait?style=flat-square)
 ![MIT License](https://img.shields.io/github/license/1000nettles/hey-wait?style=flat-square)
 
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G82ZNNS)
+[![Patreon](img/become_a_patron.png)](https://www.patreon.com/1000nettles)
 
 “Hey, Wait!” is a FoundryVTT module allowing a GM to place “event triggers” as tiles on a scene. When players collide with these triggers, the game pauses and the scene shifts to the player, allowing a GM to explain the theatre-of-the-mind landscape, if the player has ran into a pack of monsters, or anything else you can think of! You can even trigger and execute macros. The intent is to give GMs a bit of breathing room with a pack of players who love to explore.
 
