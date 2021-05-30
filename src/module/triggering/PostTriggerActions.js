@@ -1,4 +1,4 @@
-import Animator from '../Animator';
+import Constants from '../Constants';
 
 /**
  * A class to handle execution of any post-trigger actions needed.
@@ -36,7 +36,8 @@ export default class PostTriggerActions {
 
     // 3. Handle the relevant reaction if one's defined.
     const animType = tile.data?.flags?.['hey-wait']?.animType
-      ?? Animator.animationTypes.TYPE_NONE;
+      ?? Constants.DEFAULT_ANIM_TYPE;
+
     this
       .reactionCoordinator
       .handleTokenReaction(tokenDoc.parent, token, animType);

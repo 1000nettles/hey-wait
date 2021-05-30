@@ -327,7 +327,7 @@ Hooks.on('renderTileConfig', (config) => {
   }
 
   const selectedAnimType = config.object.data?.flags?.['hey-wait']?.animType
-    ?? Animator.animationTypes.TYPE_NONE;
+    ?? Constants.DEFAULT_ANIM_TYPE;
 
   const setMacro = config.object.data?.flags?.['hey-wait']?.macro;
 

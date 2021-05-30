@@ -1,3 +1,5 @@
+import Animator from './Animator';
+
 /**
  * A class storing our module's constants.
  */
@@ -31,6 +33,15 @@ export default class Constants {
       FRIENDLY_NETURAL: 2,
       FRIENDLY_NEUTRAL_HOSTILE: 3,
     };
+  }
+
+  /**
+   * The default animation type when no other is available.
+   *
+   * @return {number}
+   */
+  static get DEFAULT_ANIM_TYPE() {
+    return Animator.animationTypes.TYPE_NONE;
   }
 
   /**
