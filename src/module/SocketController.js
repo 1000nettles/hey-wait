@@ -13,74 +13,29 @@ export default class SocketController {
    *   The current User instance.
    * @param {GameChanger} gameChanger
    *   The current GameChanger instance.
-   * @param {ReactionCoordinator} reactionCoordinator
-   *   The current ReactionCoordinator instance.
    * @param {EntityFinder} entityFinder
    *   The current EntityFinder instance.
    * @param {UserOperations} userOperations
    *   The current UserOperations instance.
-   * @param {MacroOperations} macroOperations
-   *   The current MacroOperations instance.
+   * @param {TriggerActions} triggerActions
+   *   The current TriggerActions instance.
+   * @param {PostTriggerActions} postTriggerActions
+   *   The current PostTriggerActions instance.
    */
   constructor(
     socket,
     user,
     gameChanger,
-    reactionCoordinator,
     entityFinder,
     userOperations,
-    macroOperations,
+    postTriggerActions,
   ) {
-    /**
-     * The current WebSocket instance.
-     *
-     * @type {Object}
-     */
     this.socket = socket;
-
-    /**
-     * The current WebSocket instance.
-     *
-     * @type {User}
-     */
     this.user = user;
-
-    /**
-     * The current GameChanger instance.
-     *
-     * @type {GameChanger}
-     */
     this.gameChanger = gameChanger;
-
-    /**
-     * The current ReactionCoordinator instance.
-     */
-    this.reactionCoordinator = reactionCoordinator;
-
-    /**
-     * The injected EntityFinder dependency.
-     */
     this.entityFinder = entityFinder;
-
-    /**
-     * The injected UserOperations dependency.
-     *
-     * @type {UserOperations}
-     */
     this.userOperations = userOperations;
-
-    /**
-     * The injected MacroOperations dependency.
-     *
-     * @type {MacroOperations}
-     */
-    this.macroOperations = macroOperations;
-
-    /**
-     * The name of our socket.
-     *
-     * @type {string}
-     */
+    this.postTriggerActions = postTriggerActions;
     this.socketName = 'module.hey-wait';
   }
 
@@ -113,19 +68,17 @@ export default class SocketController {
    *   The scene ID where this is taking place.
    * @param {x,y} pos
    *   The X and Y position where the event takes place.
-   * @param {number} animType
-   *   The animation type to execute on the Token.
    *
    * @return {Promise<void>}
    *   The promise for what's taking place.
    */
-  async emit(tokenId, tileId, sceneId, pos, animType) {
-    console.debug(`hey-wait | Emitting to ${this.socketName}`);
+  async emit(tokenId, tileId, sceneId, pos) {
+    global.console.debug(`hey-wait | Emitting to ${this.socketName}`);
 
     this.socket.emit(
       this.socketName,
       {
-        tokenId, tileId, sceneId, pos, animType,
+        tokenId, tileId, sceneId, pos,
       },
     );
   }
@@ -142,16 +95,14 @@ export default class SocketController {
    */
   async _listen() {
     this.socket.on(this.socketName, async (data) => {
-      console.debug(`hey-wait | Emission received on ${this.socketName}`);
+      global.console.debug(`hey-wait | Emission received on ${this.socketName}`);
 
       try {
         if (!this.userOperations.canChangeGameForUser(data.sceneId)) {
           return;
         }
 
-        const scene = this.entityFinder.findScene(data.sceneId);
-
-        // 1. Change the game by potentially modifying the tile and pausing the
+        // Change the game by potentially modifying the tile and pausing the
         // game.
         await this.gameChanger.execute(
           data.tileId,
@@ -164,23 +115,16 @@ export default class SocketController {
           data.sceneId,
         );
 
-        const token = tokenDoc.object;
-        console.log(token);
+        if (!tokenDoc) {
+          global.console.error(`Could not find token document with ID ${data.tokenId}`);
+        }
 
-        // 2. Pan to the location where the event and reaction occurred.
-        await this.gameChanger.pan(
-          { x: token.x, y: token.y },
-        );
+        const tile = this.entityFinder.findTile(data.tileId);
+        if (!tile) {
+          global.console.error(`Could not find Hey, Wait! tile with ID ${data.tileId}`);
+        }
 
-        // 3. Handle any macro triggering.
-        this.macroOperations.handleTileMacroFiring(data.tileId, tokenDoc);
-
-        // 4. Animate the reaction and add SFX to it.
-        await this.reactionCoordinator.handleTokenReaction(
-          scene,
-          token,
-          data.animType,
-        );
+        await this.postTriggerActions.execute(tokenDoc, tile);
       } catch (e) {
         console.error(`hey-wait | ${e.name}: ${e.message}`);
       }

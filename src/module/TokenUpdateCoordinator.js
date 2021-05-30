@@ -1,7 +1,4 @@
 /* eslint-disable no-console */
-/* global performance */
-
-import Animator from './Animator';
 
 /**
  * Coordinate any Token updates from the Foundry Hook system.
@@ -10,17 +7,21 @@ export default class TokenUpdateCoordinator {
   /**
    * TokenUpdateCoordinator constructor.
    *
-   * @param {Triggering} triggering
-   *   The injected Triggering dependency.
-   * @param {TokenCalculator} tokenCalculator
-   *   The injected TokenCalculator dependency.
-   * @param {ReactionCoordinator} reactionCoordinator
-   *   The injected ReactionCoordinator dependency.
+   * @param {TriggeringHandler} triggeringHandler
+   *   The injected TriggeringHandler dependency.
+   * @param {PostTriggerActions} postTriggerActions
+   *   The injected PostTriggerActions dependency.
+   * @param {SocketController} socketController
+   *   The injected SocketController dependency.
    */
-  constructor(triggering, tokenCalculator, reactionCoordinator) {
-    this.triggering = triggering;
-    this.tokenCalculator = tokenCalculator;
-    this.reactionCoordinator = reactionCoordinator;
+  constructor(
+    triggeringHandler,
+    postTriggerActions,
+    socketController,
+  ) {
+    this.triggeringHandler = triggeringHandler;
+    this.postTriggerActions = postTriggerActions;
+    this.socketController = socketController;
 
     /**
      * Keep track of the Token's initial position between updates.
@@ -65,7 +66,7 @@ export default class TokenUpdateCoordinator {
    *   All of the potential tiles to check for triggers.
    */
   async coordinateUpdate(tokenDoc, tiles) {
-    const t0 = performance.now();
+    const t0 = global.performance.now();
 
     // Let's find the previously stored Token initial position.
     const initPos = this.tokenInitPos.get(tokenDoc.id);
@@ -77,27 +78,29 @@ export default class TokenUpdateCoordinator {
       return;
     }
 
-    const triggeredTile = await this.triggering.handleTileTriggering(
+    const triggeredTile = await this.triggeringHandler.handleTileTriggering(
       tiles,
       tokenDoc,
       initPos,
       tokenDoc.parent.id,
     );
 
-    const t1 = performance.now();
-    console.debug(`hey-wait | \`coordinateUpdate\` took ${t1 - t0}ms.`);
+    if (triggeredTile) {
+      const token = tokenDoc.object;
 
-    if (triggeredTile === null) {
-      this._cleanQueuedTokenInitPos(tokenDoc.id);
-      return;
+      this.socketController.emit(
+        tokenDoc.id,
+        triggeredTile.id,
+        tokenDoc.parent.id,
+        { x: token.x, y: token.y },
+      );
+      await this.postTriggerActions.execute(tokenDoc, triggeredTile);
     }
 
-    const animType = triggeredTile.data?.flags?.['hey-wait']?.animType
-      ?? Animator.animationTypes.TYPE_NONE;
+    const t1 = global.performance.now();
+    console.debug(`hey-wait | \`coordinateUpdate\` took ${t1 - t0}ms.`);
 
-    await this
-      .reactionCoordinator
-      .handleTokenReaction(tokenDoc.parent, tokenDoc.object, animType);
+    this._cleanQueuedTokenInitPos(tokenDoc.id);
   }
 
   /**

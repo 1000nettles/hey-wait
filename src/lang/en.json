@@ -18,5 +18,7 @@
   "HEYWAIT.TILECONFIG.typeQuestion": "Question ( ? )",
   "HEYWAIT.TILECONFIG.typeExclamation": "Exclamation ( ! )",
   "HEYWAIT.TILECONFIG.macroText": "Trigger Macro",
-  "HEYWAIT.TILECONFIG.macroNone": "None"
+  "HEYWAIT.TILECONFIG.macroNone": "None",
+  "HEYWAIT.TILECONFIG.unlimitedText": "Enable unlimited triggers",
+  "HEYWAIT.TILECONFIG.unlimitedHint": "If selected, after the Hey, Wait! tile is triggered, other tokens will still be able to trigger it."
 }

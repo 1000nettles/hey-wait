@@ -10,7 +10,8 @@ import { ease } from 'pixi-ease';
 import registerSettings from './module/settings';
 import ControlsGenerator from './module/ControlsGenerator';
 import Collision from './module/Collision';
-import Triggering from './module/Triggering';
+import TriggeringHandler from './module/triggering/TriggeringHandler';
+import PostTriggerActions from './module/triggering/PostTriggerActions';
 import TileAuditor from './module/TileAuditor';
 import Constants from './module/Constants';
 import SocketController from './module/SocketController';
@@ -34,9 +35,19 @@ import TokenHooks from './module/hooks/TokenHooks';
 let collision;
 
 /**
- * Our Triggering instance.
+ * Our TokenAnimationWatcher instance.
  */
-let triggering;
+let tokenAnimationWatcher;
+
+/**
+ * Our TriggeringHandler instance.
+ */
+let triggeringHandler;
+
+/**
+ * Our PostTriggerActions instance.
+ */
+let postTriggerActions;
 
 /**
  * Our TileAuditor instance.
@@ -140,6 +151,20 @@ Hooks.on('canvasReady', async () => {
   );
   userOperations = new UserOperations(game.user, game.settings);
 
+  tokenAnimationWatcher = new TokenAnimationWatcher();
+
+  postTriggerActions = new PostTriggerActions(
+    gameChanger,
+    macroOperations,
+    reactionCoordinator,
+  );
+
+  triggeringHandler = new TriggeringHandler(
+    collision,
+    gameChanger,
+    tokenAnimationWatcher,
+  );
+
   // Ensure that we only have a single socket open for our module so we don't
   // clutter up open sockets when changing scenes (or, more specifically,
   // rendering new canvases.)
@@ -150,27 +175,19 @@ Hooks.on('canvasReady', async () => {
     game.socket,
     game.user,
     gameChanger,
-    reactionCoordinator,
     entityFinder,
     userOperations,
-    macroOperations,
+    postTriggerActions,
   );
 
-  triggering = new Triggering(
-    gameChanger,
-    new TokenAnimationWatcher(),
-    socketController,
-    collision,
-    macroOperations,
-  );
   tileAuditor = new TileAuditor();
 
   tokenHooks = new TokenHooks(game.user, game.settings);
 
   tokenUpdateCoordinator = new TokenUpdateCoordinator(
-    triggering,
-    tokenCalculator,
-    reactionCoordinator,
+    triggeringHandler,
+    postTriggerActions,
+    socketController,
   );
 
   await socketController.init();
@@ -192,6 +209,7 @@ Hooks.on('preCreateTile', (document, data) => {
     triggered: false,
     animType: Number(data.heyWaitAnimType),
     macro: data.heyWaitMacro,
+    unlimited: data.heyWaitUnlimited,
   };
 
   // Hey, Wait! tiles should be hidden so players cannot see them.
@@ -228,6 +246,12 @@ Hooks.on('preUpdateTile', (document, change, options) => {
     options.diff = true;
   }
 
+  // Record the "unlimited" setting for the Hey, Wait! tile.
+  if (change?.heyWaitUnlimited !== undefined) {
+    change.flags['hey-wait'].unlimited = change.heyWaitUnlimited;
+    options.diff = true;
+  }
+
   // Change the tile image depending on triggered state.
   const triggered = change.flags['hey-wait']?.triggered;
   if (triggered !== undefined) {
@@ -239,6 +263,7 @@ Hooks.on('preUpdateTile', (document, change, options) => {
   delete data.isHeyWaitTile;
   delete data.heyWaitAnimType;
   delete data.heyWaitMacro;
+  delete data.heyWaitUnlimited;
 });
 
 Hooks.on('preUpdateToken', async (document) => {
@@ -289,7 +314,7 @@ Hooks.on('renderFormApplication', (config, html) => {
   windowTitleEl.html(`Hey, Wait! ${originalTitle}`);
 
   // Ensure we have the correct height for all the new Hey, Wait! elements.
-  html.height(384);
+  html.height(435);
 });
 
 Hooks.on('renderTileConfig', (config) => {
@@ -305,6 +330,9 @@ Hooks.on('renderTileConfig', (config) => {
     ?? Animator.animationTypes.TYPE_NONE;
 
   const setMacro = config.object.data?.flags?.['hey-wait']?.macro;
+
+  const unlimitedChecked = Boolean(config.object.data?.flags?.['hey-wait']?.unlimited
+    ?? false);
 
   // Ensure the "setMacro" exists and wasn't deleted.
   const selectedMacro = setMacro && game.macros.get(setMacro)
@@ -408,11 +436,36 @@ Hooks.on('renderTileConfig', (config) => {
 
   macroWrapped.prepend($macroLabel);
 
+  // Build "unlimited uses" checkbox.
+  const $unlimited = jQuery('<input />', {
+    type: 'checkbox',
+    name: 'heyWaitUnlimited',
+    checked: unlimitedChecked,
+  });
+
+  const $unlimitedLabel = jQuery('<label></label>')
+    .attr('for', 'heyWaitUnlimited')
+    .html(game.i18n.localize('HEYWAIT.TILECONFIG.unlimitedText'));
+
+  const $unlimitedWrapped = $unlimited
+    .wrap('<div class="form-group"></div>')
+    .parent();
+
+  const $unlimitedHint = jQuery('<p></p>')
+    .attr('class', 'notes')
+    .html(game.i18n.localize('HEYWAIT.TILECONFIG.unlimitedHint'));
+
+  $unlimitedWrapped.prepend($unlimitedLabel);
+  $unlimitedWrapped.append($unlimitedHint);
+
   jQuery(config.form).find('div[data-tab="basic"]').first().append(
     tileTypeWrapped,
   );
   jQuery(config.form).find('div[data-tab="basic"]').first().append(
     macroWrapped,
+  );
+  jQuery(config.form).find('div[data-tab="basic"]').first().append(
+    $unlimitedWrapped,
   );
 
   // Add the hidden element specifying that this is a Hey, Wait! Tile.

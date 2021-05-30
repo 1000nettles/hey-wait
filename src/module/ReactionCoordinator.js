@@ -38,7 +38,7 @@ export default class ReactionCoordinator {
    *
    * @return {Promise}
    */
-  async handleTokenReaction(scene, token, animType) {
+  handleTokenReaction(scene, token, animType) {
     const coords = this.tokenCalculator.calculateCoordinates(
       scene,
       token.data,
@@ -51,7 +51,7 @@ export default class ReactionCoordinator {
       scene.data.grid,
     );
 
-    await this._handleSfx(animType);
+    this._handleSfx(animType);
   }
 
   /**
@@ -60,32 +60,22 @@ export default class ReactionCoordinator {
    * @param {Animator.animationTypes} animType
    *   One of the animation types, which corresponds to the SFX ID number.
    *
-   * @return {Promise<unknown>}
-   *   Return the promise to be resolved once the sound is done playing.
-   *
    * @private
    */
-  async _handleSfx(animType) {
-    const promise = new Promise(() => {});
-
+  _handleSfx(animType) {
     if (
       animType === Animator.animationTypes.TYPE_NONE
       || this._sfxDisabled()
     ) {
-      return Promise.resolve(promise);
+      return;
     }
 
     const path = `modules/hey-wait/sounds/reaction${animType}.mp3`;
-    const sound = await AudioHelper.play({
+    AudioHelper.play({
       src: path,
       autoplay: true,
       volume: 0.5,
     }, false);
-
-    // Wait until the sound is finished before resolving the promise.
-    sound.on('end', () => Promise.resolve(promise));
-
-    return promise;
   }
 
   /**

@@ -42,7 +42,7 @@ export default class EntityFinder {
    * @param {string} sceneId
    *   The ID of the Scene.
    *
-   * @return {Object}
+   * @return {TokenDocument}
    */
   findTokenDocument(tokenId, sceneId) {
     const scene = this.findScene(sceneId);
@@ -57,5 +57,23 @@ export default class EntityFinder {
     }
 
     return tokenDocument;
+  }
+
+  /**
+   * Find the Tile by Tile ID.
+   *
+   * @param {string} tileId
+   *   The ID of the tile.
+   *
+   * @return {Tile}
+   */
+  findTile(tileId) {
+    const filtered = this.canvas.background.tiles.filter((tile) => tile.id === tileId);
+
+    if (!filtered.length) {
+      return false;
+    }
+
+    return filtered[0];
   }
 }

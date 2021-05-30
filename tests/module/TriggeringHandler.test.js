@@ -1,4 +1,4 @@
-import Triggering from 'module/Triggering';
+import TriggeringHandler from 'module/triggering/TriggeringHandler';
 import Animator from 'module/Animator';
 
 const initPos = {
@@ -13,10 +13,14 @@ beforeEach(() => {
   mockMacroOperations.handleTileMacroFiring = jest.fn();
 });
 
+/* this.collision = collision;
+    this.gameChanger = gameChanger;
+    this.tokenAnimationWatcher = tokenAnimationWatcher;*/
+
 it('can exit early when checking if is hey wait tile when checking is triggered', async () => {
   // gameChanger, tokenAnimationWatcher, socketController, collision
-  const triggering = new Triggering({}, {}, {}, {});
-  let result = await triggering.handleTileTriggering([], {}, initPos, 'a_viewed_scene');
+  const triggeringHandler = new TriggeringHandler({}, {}, {});
+  let result = await triggeringHandler.handleTileTriggering([], {}, initPos, 'a_viewed_scene');
   expect(result).toBeFalsy();
 
   const tile = {
@@ -28,12 +32,12 @@ it('can exit early when checking if is hey wait tile when checking is triggered'
       },
     },
   };
-  result = await triggering.handleTileTriggering([tile], {}, initPos, viewedScene);
+  result = await triggeringHandler.handleTileTriggering([tile], {}, initPos, viewedScene);
   expect(result).toBeFalsy();
 });
 
 it('can exit early when checking if previously triggered when checking is triggered', async () => {
-  const triggering = new Triggering({}, {}, {}, {});
+  const triggeringHandler = new TriggeringHandler({}, {}, {});
   const tile = {
     data: {
       flags: {
@@ -43,7 +47,7 @@ it('can exit early when checking if previously triggered when checking is trigge
       },
     },
   };
-  const result = await triggering.handleTileTriggering([tile], {}, initPos, viewedScene);
+  const result = await triggeringHandler.handleTileTriggering([tile], {}, initPos, viewedScene);
   expect(result).toBeFalsy();
 });
 
@@ -55,7 +59,7 @@ it('can exit early when checking no collision when checking is triggered', async
     checkTileTokenCollision,
   };
 
-  const triggering = new Triggering({}, {}, {}, mockCollision);
+  const triggeringHandler = new TriggeringHandler(mockCollision, {}, {});
   const tile = {
     data: {
       flags: {
@@ -66,7 +70,7 @@ it('can exit early when checking no collision when checking is triggered', async
       },
     },
   };
-  const result = await triggering.handleTileTriggering([tile], {}, initPos, viewedScene);
+  const result = await triggeringHandler.handleTileTriggering([tile], {}, initPos, viewedScene);
   expect(result).toBeFalsy();
   expect(checkTileTokenCollision).toHaveBeenCalled();
 });
@@ -79,18 +83,13 @@ it('can determine a tile has been triggered', async () => {
   mockGameChanger.execute = jest.fn();
   mockGameChanger.pan = jest.fn();
 
-  const mockSocketController = {};
-  mockSocketController.emit = jest.fn();
-
   const mockTokenAnimationWatcher = {};
   mockTokenAnimationWatcher.watchForCompletion = jest.fn();
 
-  const triggering = new Triggering(
+  const triggeringHandler = new TriggeringHandler(
+    mockCollision,
     mockGameChanger,
     mockTokenAnimationWatcher,
-    mockSocketController,
-    mockCollision,
-    mockMacroOperations,
   );
 
   const tile = {
@@ -114,7 +113,7 @@ it('can determine a tile has been triggered', async () => {
     object: token,
   };
 
-  const result = await triggering.handleTileTriggering([tile], tokenDoc, initPos, viewedScene);
+  const result = await triggeringHandler.handleTileTriggering([tile], tokenDoc, initPos, viewedScene);
 
   expect(mockCollision.checkTileTokenCollision).toHaveBeenCalledWith(
     tile,
@@ -130,23 +129,6 @@ it('can determine a tile has been triggered', async () => {
 
   expect(mockTokenAnimationWatcher.watchForCompletion).toHaveBeenCalledWith(
     'a_token_id',
-  );
-
-  expect(mockSocketController.emit).toHaveBeenCalledWith(
-    'a_token_id',
-    'an_id',
-    'a_viewed_scene',
-    { x: 3, y: 4 },
-    Animator.animationTypes.TYPE_NONE,
-  );
-
-  expect(mockGameChanger.pan).toHaveBeenCalledWith(
-    { x: 3, y: 4 },
-  );
-
-  expect(mockMacroOperations.handleTileMacroFiring).toHaveBeenCalledWith(
-    'an_id',
-    tokenDoc,
   );
 
   expect(result).toBeTruthy();

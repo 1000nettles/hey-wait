@@ -6,10 +6,9 @@ import Animator from 'module/Animator';
 let mockSocket;
 let mockUser;
 let mockGameChanger;
-let mockReactionCoordinator;
 let mockEntityFinder;
 let mockUserOperations;
-let mockMacroOperations;
+let mockPostTriggerActions;
 let socketController;
 let mockToken;
 let mockTokenDoc;
@@ -27,14 +26,11 @@ beforeEach(() => {
   mockSocket = {};
   mockUser = {};
   mockGameChanger = {};
-  mockReactionCoordinator = {};
   mockEntityFinder = {};
   mockUserOperations = {};
-  mockMacroOperations = {};
+  mockPostTriggerActions = {};
 
   mockGameChanger.pan = jest.fn();
-
-  mockReactionCoordinator.handleTokenReaction = jest.fn();
 
   mockToken = {
     x: 1,
@@ -56,19 +52,19 @@ beforeEach(() => {
 
   mockEntityFinder.findScene = jest.fn().mockReturnValue('a_scene');
   mockEntityFinder.findTokenDocument = jest.fn().mockReturnValue(mockTokenDoc);
-  mockEntityFinder.findTileData = jest.fn().mockReturnValue(mockTileData);
+  mockEntityFinder.findTile = jest.fn().mockReturnValue(mockTileData);
 
   mockUserOperations.canChangeGameForUser = jest.fn().mockReturnValue(true);
-  mockMacroOperations.handleTileMacroFiring = jest.fn();
+
+  mockPostTriggerActions.execute = jest.fn();
 
   socketController = new SocketController(
     mockSocket,
     mockUser,
     mockGameChanger,
-    mockReactionCoordinator,
     mockEntityFinder,
     mockUserOperations,
-    mockMacroOperations,
+    mockPostTriggerActions,
   );
 });
 
@@ -91,8 +87,6 @@ it('should initialize the socket listener, listen, and exit early if we cannot c
 
   expect(socketOnArgs[0]).toEqual('module.hey-wait');
   expect(mockGameChanger.execute).not.toHaveBeenCalled();
-  expect(mockReactionCoordinator.handleTokenReaction).not.toHaveBeenCalled();
-  expect(mockMacroOperations.handleTileMacroFiring).not.toHaveBeenCalled();
   expect(mockGameChanger.pan).not.toHaveBeenCalled();
 });
 
@@ -117,17 +111,9 @@ it('should initialize the socket listener, listen, and handle all game changing'
     { x: 1, y: 2 },
     'a_scene_id',
   );
-  expect(mockReactionCoordinator.handleTokenReaction).toHaveBeenCalledWith(
-    'a_scene',
-    mockToken,
-    Animator.animationTypes.TYPE_QUESTION,
-  );
-  expect(mockGameChanger.pan).toHaveBeenCalledWith(
-    { x: 1, y: 2 },
-  );
-  expect(mockMacroOperations.handleTileMacroFiring).toHaveBeenCalledWith(
-    'a_tile_id',
+  expect(mockPostTriggerActions.execute).toHaveBeenCalledWith(
     mockTokenDoc,
+    mockTileData,
   );
 });
 
