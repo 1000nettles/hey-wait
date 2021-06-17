@@ -10,15 +10,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Added support for FoundryVTT 0.8.5
-- Ensure executed macros associated with Hey, Wait! tiles pass the relevant actor and token
-- Add setting for "Token Disposition Types Allowed". This allows GMs to restrict the tokens which can trigger Hey, Wait! tiles dependant on their disposition. Defaults to "Friendly" only
+- Added support for FoundryVTT 0.8.6 - 0.8.7.
 
 ## [0.6.0] - 2021-05-23
 
 ### Added
 
-- Added support for FoundryVTT 0.8.6 - 0.8.7.
+- Added support for FoundryVTT 0.8.5
+- Ensure executed macros associated with Hey, Wait! tiles pass the relevant actor and token
+- Add setting for "Token Disposition Types Allowed". This allows GMs to restrict the tokens which can trigger Hey, Wait! tiles dependant on their disposition. Defaults to "Friendly" only
+
+### Changed
+
+- Restructured more code to be more inline with the document system
 
 ## [0.5.1] - 2021-05-18
 
