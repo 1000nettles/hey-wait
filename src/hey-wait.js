@@ -209,7 +209,7 @@ Hooks.on('preCreateTile', (document, data) => {
     triggered: false,
     animType: Number(data.heyWaitAnimType),
     macro: data.heyWaitMacro,
-    unlimited: data.heyWaitUnlimited,
+    // unlimited: data.heyWaitUnlimited,
   };
 
   // Hey, Wait! tiles should be hidden so players cannot see them.
@@ -247,10 +247,10 @@ Hooks.on('preUpdateTile', (document, change, options) => {
   }
 
   // Record the "unlimited" setting for the Hey, Wait! tile.
-  if (change?.heyWaitUnlimited !== undefined) {
+  /* if (change?.heyWaitUnlimited !== undefined) {
     change.flags['hey-wait'].unlimited = change.heyWaitUnlimited;
     options.diff = true;
-  }
+  } */
 
   // Change the tile image depending on triggered state.
   const triggered = change.flags['hey-wait']?.triggered;
@@ -263,7 +263,7 @@ Hooks.on('preUpdateTile', (document, change, options) => {
   delete data.isHeyWaitTile;
   delete data.heyWaitAnimType;
   delete data.heyWaitMacro;
-  delete data.heyWaitUnlimited;
+  // delete data.heyWaitUnlimited;
 });
 
 Hooks.on('preUpdateToken', async (document) => {
@@ -314,7 +314,7 @@ Hooks.on('renderFormApplication', (config, html) => {
   windowTitleEl.html(`Hey, Wait! ${originalTitle}`);
 
   // Ensure we have the correct height for all the new Hey, Wait! elements.
-  html.height(435);
+  html.height(384);
 });
 
 Hooks.on('renderTileConfig', (config) => {
@@ -331,8 +331,8 @@ Hooks.on('renderTileConfig', (config) => {
 
   const setMacro = config.object.data?.flags?.['hey-wait']?.macro;
 
-  const unlimitedChecked = Boolean(config.object.data?.flags?.['hey-wait']?.unlimited
-    ?? false);
+  /* const unlimitedChecked = Boolean(config.object.data?.flags?.['hey-wait']?.unlimited
+    ?? false); */
 
   // Ensure the "setMacro" exists and wasn't deleted.
   const selectedMacro = setMacro && game.macros.get(setMacro)
@@ -437,7 +437,7 @@ Hooks.on('renderTileConfig', (config) => {
   macroWrapped.prepend($macroLabel);
 
   // Build "unlimited uses" checkbox.
-  const $unlimited = jQuery('<input />', {
+  /* const $unlimited = jQuery('<input />', {
     type: 'checkbox',
     name: 'heyWaitUnlimited',
     checked: unlimitedChecked,
@@ -456,7 +456,7 @@ Hooks.on('renderTileConfig', (config) => {
     .html(game.i18n.localize('HEYWAIT.TILECONFIG.unlimitedHint'));
 
   $unlimitedWrapped.prepend($unlimitedLabel);
-  $unlimitedWrapped.append($unlimitedHint);
+  $unlimitedWrapped.append($unlimitedHint); */
 
   jQuery(config.form).find('div[data-tab="basic"]').first().append(
     tileTypeWrapped,
@@ -464,9 +464,9 @@ Hooks.on('renderTileConfig', (config) => {
   jQuery(config.form).find('div[data-tab="basic"]').first().append(
     macroWrapped,
   );
-  jQuery(config.form).find('div[data-tab="basic"]').first().append(
+  /* jQuery(config.form).find('div[data-tab="basic"]').first().append(
     $unlimitedWrapped,
-  );
+  ); */
 
   // Add the hidden element specifying that this is a Hey, Wait! Tile.
   const hidden = jQuery('<input>')

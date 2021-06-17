@@ -1,5 +1,4 @@
 import TriggeringHandler from 'module/triggering/TriggeringHandler';
-import Animator from 'module/Animator';
 
 const initPos = {
   x: 1,
@@ -15,7 +14,7 @@ beforeEach(() => {
 
 /* this.collision = collision;
     this.gameChanger = gameChanger;
-    this.tokenAnimationWatcher = tokenAnimationWatcher;*/
+    this.tokenAnimationWatcher = tokenAnimationWatcher; */
 
 it('can exit early when checking if is hey wait tile when checking is triggered', async () => {
   // gameChanger, tokenAnimationWatcher, socketController, collision
@@ -113,7 +112,12 @@ it('can determine a tile has been triggered', async () => {
     object: token,
   };
 
-  const result = await triggeringHandler.handleTileTriggering([tile], tokenDoc, initPos, viewedScene);
+  const result = await triggeringHandler.handleTileTriggering(
+    [tile],
+    tokenDoc,
+    initPos,
+    viewedScene,
+  );
 
   expect(mockCollision.checkTileTokenCollision).toHaveBeenCalledWith(
     tile,
