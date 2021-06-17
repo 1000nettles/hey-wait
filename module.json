@@ -19,7 +19,7 @@
   "compatibleCoreVersion": "0.8.7",
   "url": "https://github.com/1000nettles/hey-wait",
   "manifest": "https://github.com/1000nettles/hey-wait/releases/download/v0.6.1/module.json",
-  "download": "https://github.com/1000nettles/hey-wait/releases/download/v0.6.1/hey-wait-v0.6.0.zip",
+  "download": "https://github.com/1000nettles/hey-wait/releases/download/v0.6.1/hey-wait-v0.6.1.zip",
   "license": "MIT",
   "readme": "https://raw.githubusercontent.com/1000nettles/hey-wait/main/README.md"
 }
