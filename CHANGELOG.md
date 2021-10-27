@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.6.2] - 2021-10-27
+
+### Added
+
+- Added support for FoundryVTT 0.8.8 - 0.8.9
+- Added basic integration to the Levels module to ensure Hey, Wait! doesn't trigger on incorrect level
+
 ## [0.6.1] - 2021-06-16
 
 ### Added

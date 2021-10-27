@@ -1,5 +1,8 @@
 /* eslint-disable no-console */
 
+/* global _levels */
+/* global _levelsModuleName */
+
 /**
  * A class to handle any triggering logic and tile modification operations.
  */
@@ -83,6 +86,10 @@ export default class TriggeringHandler {
       return false;
     }
 
+    if (!this._checkIsValidWithOtherModules(tile, tokenDoc.object)) {
+      return false;
+    }
+
     if (this._isPreviouslyTriggered(tile)) {
       return false;
     }
@@ -108,6 +115,19 @@ export default class TriggeringHandler {
     return Boolean(
       tile.data?.flags?.['hey-wait']?.enabled,
     );
+  }
+
+  _checkIsValidWithOtherModules(tile, token) {
+    // If the Levels module is enabled, ensure we don't trigger on a wrong level.
+    if (
+      typeof _levels !== 'undefined'
+      && typeof _levelsModuleName !== 'undefined'
+      && !_levels.isTokenInRange(token, tile)
+    ) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
