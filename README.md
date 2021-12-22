@@ -1,7 +1,7 @@
 # Hey, Wait! :raised_hand:
 
-**0.8.x version:**
-![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.6.2.zip?style=flat-square)
+**9.x / 0.8.x version:**
+![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.6.3.zip?style=flat-square)
 
 **0.7.x version:**
 ![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/v0.4.0/hey-wait-v0.4.0.zip?style=flat-square)
