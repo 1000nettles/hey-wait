@@ -28,6 +28,7 @@ import TokenHooks from './module/hooks/TokenHooks';
 
 /* eslint no-console: ['error', { allow: ['warn', 'log', 'debug'] }] */
 /* eslint-disable no-param-reassign */
+/* global CONFIG */
 
 /**
  * Our Collision instance.
@@ -111,6 +112,15 @@ const {
   renderTemplate,
 } = global;
 
+/**
+ * Determine if we're running Foundry v9.x or not.
+ *
+ * @return {boolean}
+ */
+function isV9x() {
+  return CONFIG?.Canvas?.layers?.background?.layerClass != null;
+}
+
 /* ------------------------------------ */
 /* Initialize module                    */
 /* ------------------------------------ */
@@ -124,7 +134,13 @@ Hooks.once('init', () => {
 /* ------------------------------------ */
 Hooks.on('canvasReady', async () => {
   const { canvas, game, ui } = global;
-  const backgroundLayer = global.CONFIG.Canvas.layers.background;
+
+  let backgroundLayer;
+  if (isV9x()) {
+    backgroundLayer = global.CONFIG.Canvas.layers.background.layerClass;
+  } else {
+    backgroundLayer = global.CONFIG.Canvas.layers.background;
+  }
 
   collision = new Collision(canvas.grid.size);
   gameChanger = new GameChanger(game, canvas);
@@ -301,9 +317,16 @@ Hooks.on('renderFormApplication', (config, html) => {
   // Ensure the form application we're targeting is actually the Tile config.
   // Ensure that we're also interacting with a Hey, Wait! tile, and not
   // a regular tile.
+  if (!config?.options?.id) {
+    return;
+  }
+
+  const tileConfigOptionsId = isV9x()
+    ? global.CONFIG.Tile.sheetClasses.base['core.TileConfig'].cls.defaultOptions.id
+    : global.CONFIG.Tile.sheetClass.defaultOptions.id;
+
   if (
-    !config?.options?.id
-    || config.options.id !== global.CONFIG.Tile.sheetClass.defaultOptions.id
+    config.options.id !== tileConfigOptionsId
     || !tileAuditor.isHeyWaitTile(config.object, global.game.activeTool)
   ) {
     return;
