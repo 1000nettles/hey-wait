@@ -9,6 +9,11 @@
       "lang": "en",
       "name": "English",
       "path": "src/lang/en.json"
+    },
+    {
+      "lang": "ja",
+      "name": "日本語",
+      "path": "src/lang/ja.json"
     }
   ],
   "esmodules": [
