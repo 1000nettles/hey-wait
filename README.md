@@ -1,5 +1,7 @@
 # Hey, Wait! :raised_hand:
 
+This version is deprecated and is specific for FoundryVTT versions 0.7, 0.8, and 0.9. For version 0.10, please see https://github.com/Couls/hey-wait and https://foundryvtt.com/packages/hey-wait/.
+
 **9.x / 0.8.x version:**
 ![Downloads](https://img.shields.io/github/downloads/1000nettles/hey-wait/latest/hey-wait-v0.6.3.zip?style=flat-square)
 
